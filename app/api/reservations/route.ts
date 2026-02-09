@@ -18,10 +18,10 @@ export async function GET(request: Request) {
 
   // Admins can see all, users see only their own
   if (all && user.role === "ADMIN") {
-    return NextResponse.json(getReservations())
+    return NextResponse.json(await getReservations())
   }
 
-  return NextResponse.json(getReservationsByUserId(user.id))
+  return NextResponse.json(await getReservationsByUserId(user.id))
 }
 
 export async function POST(request: Request) {
@@ -37,7 +37,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
   }
 
-  const room = getRoomById(roomId)
+  const room = await getRoomById(roomId)
   if (!room) {
     return NextResponse.json({ error: "Room not found" }, { status: 404 })
   }
@@ -53,7 +53,7 @@ export async function POST(request: Request) {
 
   const totalPrice = nights * room.pricePerNight
 
-  const reservation = createReservation({
+  const reservation = await createReservation({
     userId: user.id,
     roomId,
     checkIn,

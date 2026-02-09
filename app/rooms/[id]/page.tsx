@@ -1,5 +1,5 @@
 import { Navigation } from "@/components/navigation"
-import { getRoomById, getRooms } from "@/lib/db"
+import { getRoomById } from "@/lib/db"
 import { notFound } from "next/navigation"
 import Image from "next/image"
 import { Badge } from "@/components/ui/badge"
@@ -15,7 +15,7 @@ export default async function RoomDetailPage({
   params: Promise<{ id: string }>
 }) {
   const { id } = await params
-  const room = getRoomById(id)
+  const room = await getRoomById(id)
 
   if (!room) {
     notFound()

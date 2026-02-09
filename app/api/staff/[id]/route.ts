@@ -11,7 +11,7 @@ export async function GET(
   }
 
   const { id } = await params
-  const member = getStaffById(id)
+  const member = await getStaffById(id)
   if (!member) {
     return NextResponse.json({ error: "Staff member not found" }, { status: 404 })
   }
@@ -28,7 +28,7 @@ export async function PUT(
 
   const { id } = await params
   const body = await request.json()
-  const member = updateStaff(id, body)
+  const member = await updateStaff(id, body)
 
   if (!member) {
     return NextResponse.json({ error: "Staff member not found" }, { status: 404 })
@@ -46,7 +46,7 @@ export async function DELETE(
   }
 
   const { id } = await params
-  const deleted = deleteStaff(id)
+  const deleted = await deleteStaff(id)
 
   if (!deleted) {
     return NextResponse.json({ error: "Staff member not found" }, { status: 404 })

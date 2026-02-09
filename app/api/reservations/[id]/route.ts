@@ -7,7 +7,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
-  const reservation = getReservationById(id)
+  const reservation = await getReservationById(id)
   if (!reservation) {
     return NextResponse.json({ error: "Reservation not found" }, { status: 404 })
   }
@@ -34,7 +34,7 @@ export async function PUT(
     )
   }
 
-  const reservation = updateReservation(id, body)
+  const reservation = await updateReservation(id, body)
   if (!reservation) {
     return NextResponse.json({ error: "Reservation not found" }, { status: 404 })
   }

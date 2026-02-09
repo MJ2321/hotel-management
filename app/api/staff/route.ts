@@ -6,7 +6,7 @@ export async function GET() {
   if (!(await isAdmin())) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 })
   }
-  return NextResponse.json(getStaff())
+  return NextResponse.json(await getStaff())
 }
 
 export async function POST(request: Request) {
@@ -21,8 +21,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
   }
 
-  const member = createStaff({
-    userId: "",
+  const member = await createStaff({
+    userId: null,
     name,
     email,
     phone: phone || "",

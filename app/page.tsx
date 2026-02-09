@@ -109,8 +109,8 @@ function FeaturesSection() {
   )
 }
 
-function FeaturedRoomsSection() {
-  const rooms = getRooms().slice(0, 3)
+async function FeaturedRoomsSection() {
+  const rooms = (await getRooms()).slice(0, 3)
 
   return (
     <section className="bg-secondary/50 py-20">

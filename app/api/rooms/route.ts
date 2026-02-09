@@ -16,10 +16,10 @@ export async function GET(request: Request) {
   const all = searchParams.get("all") === "true"
 
   if (all) {
-    return NextResponse.json(getRooms())
+    return NextResponse.json(await getRooms())
   }
 
-  const rooms = getAvailableRooms(checkIn, checkOut, capacity, maxPrice)
+  const rooms = await getAvailableRooms(checkIn, checkOut, capacity, maxPrice)
   return NextResponse.json(rooms)
 }
 
@@ -35,7 +35,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
   }
 
-  const room = createRoom({
+  const room = await createRoom({
     number,
     name,
     type: type as RoomType,

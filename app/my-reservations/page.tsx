@@ -1,5 +1,5 @@
 import { Navigation } from "@/components/navigation"
-import { getReservationsByUserId, getRoomById } from "@/lib/db"
+import { getReservationsByUserId } from "@/lib/db"
 import { getCurrentUser } from "@/lib/auth"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -19,7 +19,7 @@ function StatusBadge({ status }: { status: ReservationStatus }) {
 
 export default async function MyReservationsPage() {
   const user = await getCurrentUser()
-  const reservations = user ? getReservationsByUserId(user.id) : []
+  const reservations = user ? await getReservationsByUserId(user.id) : []
 
   return (
     <div className="min-h-screen">
@@ -58,7 +58,7 @@ export default async function MyReservationsPage() {
         ) : (
           <div className="flex flex-col gap-4">
             {reservations.map((reservation) => {
-              const room = getRoomById(reservation.roomId)
+              const room = reservation.room
               const nights = Math.ceil(
                 (new Date(reservation.checkOut).getTime() -
                   new Date(reservation.checkIn).getTime()) /
@@ -87,7 +87,7 @@ export default async function MyReservationsPage() {
                           </span>
                           <span className="flex items-center gap-2">
                             <CalendarDays className="h-4 w-4" />
-                            {reservation.checkIn} to {reservation.checkOut} (
+                            {new Date(reservation.checkIn).toLocaleDateString()} to {new Date(reservation.checkOut).toLocaleDateString()} (
                             {nights} {nights === 1 ? "night" : "nights"})
                           </span>
                           <span className="flex items-center gap-2">

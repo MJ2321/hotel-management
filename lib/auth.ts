@@ -1,24 +1,21 @@
 import { cookies } from "next/headers"
 import { getUserById, getUsers } from "./db"
-import type { User } from "./types"
-
-// Mock authentication system
-// In production, replace with proper session/JWT-based auth
 
 const CURRENT_USER_COOKIE = "hotel-current-user"
 
-export async function getCurrentUser(): Promise<User | null> {
+export async function getCurrentUser() {
   const cookieStore = await cookies()
   const userId = cookieStore.get(CURRENT_USER_COOKIE)?.value
   if (!userId) {
     // Default to first user for demo purposes
-    return getUsers()[0]
+    const users = await getUsers()
+    return users[0] ?? null
   }
   return getUserById(userId)
 }
 
-export async function setCurrentUser(userId: string): Promise<User | null> {
-  const user = getUserById(userId)
+export async function setCurrentUser(userId: string) {
+  const user = await getUserById(userId)
   if (!user) return null
   const cookieStore = await cookies()
   cookieStore.set(CURRENT_USER_COOKIE, userId, {

@@ -5,7 +5,8 @@ import { getUsers } from "@/lib/db"
 // Get current user session
 export async function GET() {
   const user = await getCurrentUser()
-  return NextResponse.json({ user, allUsers: getUsers() })
+  const allUsers = await getUsers()
+  return NextResponse.json({ user, allUsers })
 }
 
 // Switch user (mock login)

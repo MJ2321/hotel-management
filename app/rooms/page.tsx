@@ -2,8 +2,8 @@ import { Navigation } from "@/components/navigation"
 import { RoomsList } from "@/components/rooms-list"
 import { getRooms } from "@/lib/db"
 
-export default function RoomsPage() {
-  const rooms = getRooms()
+export default async function RoomsPage() {
+  const rooms = await getRooms()
 
   return (
     <div className="min-h-screen">

@@ -3,10 +3,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { BedDouble, CalendarDays, Users, DollarSign } from "lucide-react"
 
-export default function AdminOverview() {
-  const rooms = getRooms()
-  const reservations = getReservations()
-  const staff = getStaff()
+export default async function AdminOverview() {
+  const rooms = await getRooms()
+  const reservations = await getReservations()
+  const staff = await getStaff()
 
   const availableRooms = rooms.filter((r) => r.available).length
   const pendingReservations = reservations.filter(
@@ -80,7 +80,7 @@ export default function AdminOverview() {
         <CardContent>
           <div className="flex flex-col gap-3">
             {reservations.slice(0, 5).map((res) => {
-              const room = getRooms().find((r) => r.id === res.roomId)
+              const room = res.room
               return (
                 <div
                   key={res.id}
@@ -89,7 +89,7 @@ export default function AdminOverview() {
                   <div>
                     <p className="font-medium text-card-foreground">{res.guestName}</p>
                     <p className="text-sm text-muted-foreground">
-                      {room?.name} &middot; {res.checkIn} to {res.checkOut}
+                      {room?.name} &middot; {new Date(res.checkIn).toLocaleDateString()} to {new Date(res.checkOut).toLocaleDateString()}
                     </p>
                   </div>
                   <div className="flex items-center gap-3">

@@ -7,7 +7,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params
-  const room = getRoomById(id)
+  const room = await getRoomById(id)
   if (!room) {
     return NextResponse.json({ error: "Room not found" }, { status: 404 })
   }
@@ -24,7 +24,7 @@ export async function PUT(
 
   const { id } = await params
   const body = await request.json()
-  const room = updateRoom(id, body)
+  const room = await updateRoom(id, body)
 
   if (!room) {
     return NextResponse.json({ error: "Room not found" }, { status: 404 })
@@ -42,7 +42,7 @@ export async function DELETE(
   }
 
   const { id } = await params
-  const deleted = deleteRoom(id)
+  const deleted = await deleteRoom(id)
 
   if (!deleted) {
     return NextResponse.json({ error: "Room not found" }, { status: 404 })
