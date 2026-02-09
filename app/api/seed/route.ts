@@ -1,5 +1,11 @@
 import { prisma } from "@/lib/prisma"
 import { NextResponse } from "next/server"
+import bcrypt from "bcryptjs"
+
+const hashPassword = (name: string) => {
+  const firstName = name.split(" ")[0]?.toLowerCase() ?? "user"
+  return bcrypt.hash(`${firstName}123`, 10)
+}
 
 export async function POST() {
   try {
@@ -18,8 +24,9 @@ export async function POST() {
         email: "jan@example.com",
         role: "USER",
         phone: "+48 500 100 200",
+        password: await hashPassword("Jan Kowalski"),
         createdAt: new Date("2025-01-15T10:00:00Z"),
-      },
+      } as any,
     })
     const user2 = await prisma.user.create({
       data: {
@@ -27,8 +34,9 @@ export async function POST() {
         email: "anna@example.com",
         role: "ADMIN",
         phone: "+48 500 300 400",
+        password: await hashPassword("Anna Nowak"),
         createdAt: new Date("2025-01-10T08:00:00Z"),
-      },
+      } as any,
     })
     const user3 = await prisma.user.create({
       data: {
@@ -36,8 +44,9 @@ export async function POST() {
         email: "piotr@example.com",
         role: "STAFF",
         phone: "+48 500 500 600",
+        password: await hashPassword("Piotr Wisniewski"),
         createdAt: new Date("2025-02-01T09:00:00Z"),
-      },
+      } as any,
     })
     const user4 = await prisma.user.create({
       data: {
@@ -45,8 +54,9 @@ export async function POST() {
         email: "maria@example.com",
         role: "USER",
         phone: "+48 500 700 800",
+        password: await hashPassword("Maria Zielinska"),
         createdAt: new Date("2025-03-05T11:00:00Z"),
-      },
+      } as any,
     })
 
     // === ROOMS ===

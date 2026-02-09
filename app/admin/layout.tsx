@@ -41,8 +41,7 @@ export default async function AdminLayout({
               </h2>
               <p className="mt-2 text-muted-foreground">
                 You need administrator privileges to access this page. Please
-                switch to an admin account using the user switcher in the
-                header.
+                log in with an admin account.
               </p>
               <Button asChild className="mt-6">
                 <Link href="/">Go Home</Link>

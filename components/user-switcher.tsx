@@ -1,42 +1,42 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useEffect, useState, useCallback } from "react"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { User, LogOut } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Badge } from "@/components/ui/badge"
-import { User, ChevronDown } from "lucide-react"
 import type { User as UserType } from "@/lib/types"
-import { useRouter } from "next/navigation"
 
 export function UserSwitcher() {
   const [currentUser, setCurrentUser] = useState<UserType | null>(null)
-  const [allUsers, setAllUsers] = useState<UserType[]>([])
   const router = useRouter()
 
-  useEffect(() => {
+  const fetchUser = useCallback(() => {
     fetch("/api/auth")
       .then((res) => res.json())
-      .then((data) => {
-        setCurrentUser(data.user)
-        setAllUsers(data.allUsers)
-      })
+      .then((data) => setCurrentUser(data.user ?? null))
+      .catch(() => setCurrentUser(null))
   }, [])
 
-  async function switchUser(userId: string) {
-    const res = await fetch("/api/auth", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ userId }),
-    })
-    const data = await res.json()
-    setCurrentUser(data.user)
+  useEffect(() => {
+    fetchUser()
+    const handler = () => fetchUser()
+    window.addEventListener("auth-changed", handler)
+    return () => window.removeEventListener("auth-changed", handler)
+  }, [fetchUser])
+
+  async function logout() {
+    await fetch("/api/auth", { method: "DELETE" })
+    setCurrentUser(null)
+    window.dispatchEvent(new Event("auth-changed"))
     router.refresh()
   }
 
@@ -51,7 +51,12 @@ export function UserSwitcher() {
     }
   }
 
-  if (!currentUser) return null
+  if (!currentUser)
+    return (
+      <Button asChild variant="outline" className="bg-card text-card-foreground">
+        <Link href="/#login">Login</Link>
+      </Button>
+    )
 
   return (
     <DropdownMenu>
@@ -62,26 +67,15 @@ export function UserSwitcher() {
           <Badge variant={roleBadgeVariant(currentUser.role)} className="text-xs">
             {currentUser.role}
           </Badge>
-          <ChevronDown className="h-3 w-3 opacity-50" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuLabel>Switch User</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        {allUsers.map((user) => (
-          <DropdownMenuItem
-            key={user.id}
-            onClick={() => switchUser(user.id)}
-            className={currentUser.id === user.id ? "bg-accent" : ""}
-          >
-            <span className="flex items-center gap-2">
-              {user.name}
-              <Badge variant={roleBadgeVariant(user.role)} className="text-xs">
-                {user.role}
-              </Badge>
-            </span>
-          </DropdownMenuItem>
-        ))}
+      <DropdownMenuContent align="end" className="w-52">
+        <DropdownMenuLabel className="flex items-center gap-2">
+          Signed in as <span className="font-medium">{currentUser.email}</span>
+        </DropdownMenuLabel>
+        <DropdownMenuItem onClick={logout} className="gap-2 text-red-600">
+          <LogOut className="h-4 w-4" /> Logout
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   )

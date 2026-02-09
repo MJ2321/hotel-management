@@ -7,18 +7,34 @@ import { UserSwitcher } from "@/components/user-switcher"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Menu, Hotel } from "lucide-react"
-import { useState } from "react"
-
-const navLinks = [
-  { href: "/", label: "Home" },
-  { href: "/rooms", label: "Rooms" },
-  { href: "/my-reservations", label: "My Reservations" },
-  { href: "/admin", label: "Admin Panel" },
-]
+import { useEffect, useState, useCallback } from "react"
+import type { User } from "@/lib/types"
 
 export function Navigation() {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
+  const [user, setUser] = useState<User | null>(null)
+
+  const fetchUser = useCallback(() => {
+    fetch("/api/auth")
+      .then((res) => res.json())
+      .then((data) => setUser(data.user ?? null))
+      .catch(() => setUser(null))
+  }, [])
+
+  useEffect(() => {
+    fetchUser()
+    const handler = () => fetchUser()
+    window.addEventListener("auth-changed", handler)
+    return () => window.removeEventListener("auth-changed", handler)
+  }, [fetchUser])
+
+  const navLinks = [
+    { href: "/", label: "Home" },
+    { href: "/rooms", label: "Rooms" },
+    { href: "/my-reservations", label: "My Reservations" },
+    ...(user?.role === "ADMIN" ? [{ href: "/admin", label: "Admin Panel" }] : []),
+  ]
 
   return (
     <header className="sticky top-0 z-50 border-b bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80">

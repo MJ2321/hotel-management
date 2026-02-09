@@ -1,16 +1,12 @@
 import { cookies } from "next/headers"
-import { getUserById, getUsers } from "./db"
+import { getUserById } from "./db"
 
 const CURRENT_USER_COOKIE = "hotel-current-user"
 
 export async function getCurrentUser() {
   const cookieStore = await cookies()
   const userId = cookieStore.get(CURRENT_USER_COOKIE)?.value
-  if (!userId) {
-    // Default to first user for demo purposes
-    const users = await getUsers()
-    return users[0] ?? null
-  }
+  if (!userId) return null
   return getUserById(userId)
 }
 
@@ -24,6 +20,11 @@ export async function setCurrentUser(userId: string) {
     maxAge: 60 * 60 * 24 * 7, // 1 week
   })
   return user
+}
+
+export async function clearCurrentUser() {
+  const cookieStore = await cookies()
+  cookieStore.set(CURRENT_USER_COOKIE, "", { path: "/", maxAge: 0 })
 }
 
 export async function isAdmin(): Promise<boolean> {

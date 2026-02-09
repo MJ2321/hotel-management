@@ -5,7 +5,8 @@ import { Badge } from "@/components/ui/badge"
 import { getRooms } from "@/lib/db"
 import Link from "next/link"
 import Image from "next/image"
-import { BedDouble, Users, Star, Shield } from "lucide-react"
+import { BedDouble, Users, Star, Shield, Lock } from "lucide-react"
+import { LoginForm } from "@/components/login-form"
 
 function HeroSection() {
   return (
@@ -109,6 +110,31 @@ function FeaturesSection() {
   )
 }
 
+function LoginSection() {
+  return (
+    <section className="bg-secondary/40 py-16">
+      <div className="mx-auto grid max-w-7xl gap-8 px-4 lg:grid-cols-2 lg:px-8">
+        <div className="flex flex-col justify-center space-y-4">
+          <Badge variant="secondary" className="w-fit bg-primary/10 text-primary border-primary/20">
+            Secure access
+          </Badge>
+          <h2 className="font-serif text-3xl font-bold text-foreground text-balance">
+            Sign in to manage your stay
+          </h2>
+          <p className="text-muted-foreground">
+            Log in with your hotel account. Administrators will automatically see a shortcut to the admin panel once signed in.
+          </p>
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <Lock className="h-4 w-4" />
+            Credentials are verified against the database.
+          </div>
+        </div>
+        <LoginForm />
+      </div>
+    </section>
+  )
+}
+
 async function FeaturedRoomsSection() {
   const rooms = (await getRooms()).slice(0, 3)
 
@@ -180,16 +206,14 @@ export default function HomePage() {
       <Navigation />
       <main>
         <HeroSection />
+        <LoginSection />
         <FeaturesSection />
         <FeaturedRoomsSection />
       </main>
       <footer className="border-t bg-card py-10">
         <div className="mx-auto max-w-7xl px-4 text-center text-sm text-muted-foreground lg:px-8">
           <p>Grand Haven Hotel Management System</p>
-          <p className="mt-1">
-            Demo application with mock authentication. Switch users via the
-            dropdown in the header.
-          </p>
+          <p className="mt-1">Authentication is now validated against the database.</p>
         </div>
       </footer>
     </div>

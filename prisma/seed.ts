@@ -1,17 +1,18 @@
 import "dotenv/config"
 
-// Use @prisma/client runtime with the generated config  
-import { PrismaClient } from "@prisma/client"
+// Use generated Prisma Client (output in lib/generated/prisma)
+import { PrismaClient } from '@/lib/generated/prisma/client'
+import { PrismaPg } from '@prisma/adapter-pg'
+import bcrypt from "bcryptjs"
 
 // PrismaClient instance with custom model typings
-const prisma = new PrismaClient({
-  datasourceUrl: process.env.DATABASE_URL,
-}) as PrismaClient & {
-  user: any
-  room: any
-  reservation: any
-  staff: any
+const connectionString = process.env.DATABASE_URL
+if (!connectionString) {
+  throw new Error('DATABASE_URL is required for seeding')
 }
+
+const adapter = new PrismaPg({ connectionString })
+const prisma = new PrismaClient({ adapter })
 
 async function main() {
   console.log("🌱 Seeding database...")
@@ -23,45 +24,48 @@ async function main() {
   await prisma.user.deleteMany()
 
   // === Users ===
-  const user1 = await prisma.user.create({
-    data: {
-      name: "Jan Kowalski",
-      email: "jan@example.com",
-      role: "USER",
-      phone: "+48 500 100 200",
-      createdAt: new Date("2025-01-15T10:00:00Z"),
-    },
-  })
-
-  const user2 = await prisma.user.create({
-    data: {
-      name: "Anna Nowak",
-      email: "anna@example.com",
-      role: "ADMIN",
-      phone: "+48 500 300 400",
-      createdAt: new Date("2025-01-10T08:00:00Z"),
-    },
-  })
-
-  const user3 = await prisma.user.create({
-    data: {
-      name: "Piotr Wisniewski",
-      email: "piotr@example.com",
-      role: "STAFF",
-      phone: "+48 500 500 600",
-      createdAt: new Date("2025-02-01T09:00:00Z"),
-    },
-  })
-
-  const user4 = await prisma.user.create({
-    data: {
-      name: "Maria Zielinska",
-      email: "maria@example.com",
-      role: "USER",
-      phone: "+48 500 700 800",
-      createdAt: new Date("2025-03-05T11:00:00Z"),
-    },
-  })
+  const [user1, user2, user3, user4] = await Promise.all([
+    prisma.user.create({
+      data: {
+        name: "Jan Kowalski",
+        email: "jan@example.com",
+        password: await bcrypt.hash("password123", 10),
+        role: "USER",
+        phone: "+48 500 100 200",
+        createdAt: new Date("2025-01-15T10:00:00Z"),
+      },
+    }),
+    prisma.user.create({
+      data: {
+        name: "Anna Nowak",
+        email: "anna@example.com",
+        password: await bcrypt.hash("admin123", 10),
+        role: "ADMIN",
+        phone: "+48 500 300 400",
+        createdAt: new Date("2025-01-10T08:00:00Z"),
+      },
+    }),
+    prisma.user.create({
+      data: {
+        name: "Piotr Wisniewski",
+        email: "piotr@example.com",
+        password: await bcrypt.hash("staff123", 10),
+        role: "STAFF",
+        phone: "+48 500 500 600",
+        createdAt: new Date("2025-02-01T09:00:00Z"),
+      },
+    }),
+    prisma.user.create({
+      data: {
+        name: "Maria Zielinska",
+        email: "maria@example.com",
+        password: await bcrypt.hash("password123", 10),
+        role: "USER",
+        phone: "+48 500 700 800",
+        createdAt: new Date("2025-03-05T11:00:00Z"),
+      },
+    }),
+  ])
 
   console.log("✅ Users created")
 

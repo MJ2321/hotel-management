@@ -39,7 +39,22 @@ export default async function MyReservationsPage() {
           </Button>
         </div>
 
-        {reservations.length === 0 ? (
+        {!user ? (
+          <Card className="border-dashed border-border bg-card">
+            <CardContent className="flex flex-col items-center py-16">
+              <CalendarDays className="h-12 w-12 text-muted-foreground/50" />
+              <h3 className="mt-4 text-lg font-semibold text-card-foreground">
+                Please sign in
+              </h3>
+              <p className="mt-2 text-muted-foreground">
+                Log in to view and manage your reservations.
+              </p>
+              <Button asChild className="mt-6">
+                <Link href="/#login">Go to login</Link>
+              </Button>
+            </CardContent>
+          </Card>
+        ) : reservations.length === 0 ? (
           <Card className="border-dashed border-border bg-card">
             <CardContent className="flex flex-col items-center py-16">
               <CalendarDays className="h-12 w-12 text-muted-foreground/50" />

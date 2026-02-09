@@ -4,11 +4,31 @@ import type { Prisma } from "@/lib/generated/prisma/client"
 // === Users ===
 
 export async function getUsers() {
-  return prisma.user.findMany({ orderBy: { createdAt: "asc" } })
+  return prisma.user.findMany({
+    orderBy: { createdAt: "asc" },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      phone: true,
+      createdAt: true,
+    },
+  })
 }
 
 export async function getUserById(id: string) {
-  return prisma.user.findUnique({ where: { id } })
+  return prisma.user.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      role: true,
+      phone: true,
+      createdAt: true,
+    },
+  })
 }
 
 export async function getUserByEmail(email: string) {

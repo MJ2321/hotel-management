@@ -1,27 +1,41 @@
 import { NextResponse } from "next/server"
-import { getCurrentUser, setCurrentUser } from "@/lib/auth"
-import { getUsers } from "@/lib/db"
+import bcrypt from "bcryptjs"
+import { getCurrentUser, setCurrentUser, clearCurrentUser } from "@/lib/auth"
+import { prisma } from "@/lib/prisma"
 
 // Get current user session
 export async function GET() {
   const user = await getCurrentUser()
-  const allUsers = await getUsers()
-  return NextResponse.json({ user, allUsers })
+  return NextResponse.json({ user })
 }
 
-// Switch user (mock login)
+// Login with email/password
 export async function POST(request: Request) {
   const body = await request.json()
-  const { userId } = body
+  const { email, password } = body
 
-  if (!userId) {
-    return NextResponse.json({ error: "Missing userId" }, { status: 400 })
+  if (!email || !password) {
+    return NextResponse.json({ error: "Missing email or password" }, { status: 400 })
   }
 
-  const user = await setCurrentUser(userId)
-  if (!user) {
-    return NextResponse.json({ error: "User not found" }, { status: 404 })
+  // Types are outdated before regeneration; select all fields and cast
+  const user = (await prisma.user.findUnique({ where: { email } })) as any
+  if (!user || !user.password) {
+    return NextResponse.json({ error: "Invalid credentials" }, { status: 401 })
   }
 
-  return NextResponse.json({ user })
+  const valid = await bcrypt.compare(password, user.password)
+  if (!valid) {
+    return NextResponse.json({ error: "Invalid credentials" }, { status: 401 })
+  }
+
+  await setCurrentUser(user.id)
+  const { password: _pw, ...safeUser } = user
+  return NextResponse.json({ user: safeUser })
+}
+
+// Logout
+export async function DELETE() {
+  await clearCurrentUser()
+  return NextResponse.json({ success: true })
 }
