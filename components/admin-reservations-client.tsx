@@ -1,0 +1,145 @@
+"use client"
+
+import { useState } from "react"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import type { Reservation, Room, ReservationStatus } from "@/lib/types"
+import { toast } from "sonner"
+import { Check, X } from "lucide-react"
+
+function StatusBadge({ status }: { status: ReservationStatus }) {
+  const variants: Record<ReservationStatus, "default" | "secondary" | "destructive"> = {
+    PENDING: "secondary",
+    CONFIRMED: "default",
+    CANCELLED: "destructive",
+  }
+  return <Badge variant={variants[status]}>{status}</Badge>
+}
+
+export function AdminReservationsClient({
+  initialReservations,
+  rooms,
+}: {
+  initialReservations: Reservation[]
+  rooms: Room[]
+}) {
+  const [reservations, setReservations] = useState(initialReservations)
+
+  function getRoomName(roomId: string) {
+    const room = rooms.find((r) => r.id === roomId)
+    return room ? `${room.name} (#${room.number})` : "Unknown"
+  }
+
+  async function updateStatus(id: string, status: ReservationStatus) {
+    try {
+      const res = await fetch(`/api/reservations/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      })
+      if (!res.ok) throw new Error("Failed to update reservation")
+      const updated = await res.json()
+      setReservations((prev) =>
+        prev.map((r) => (r.id === updated.id ? updated : r))
+      )
+      toast.success(`Reservation ${status.toLowerCase()}`)
+    } catch {
+      toast.error("Failed to update reservation")
+    }
+  }
+
+  const pending = reservations.filter((r) => r.status === "PENDING").length
+  const confirmed = reservations.filter((r) => r.status === "CONFIRMED").length
+  const cancelled = reservations.filter((r) => r.status === "CANCELLED").length
+
+  return (
+    <div>
+      <div className="mb-4 flex flex-wrap items-center gap-4">
+        <p className="text-sm text-muted-foreground">
+          {reservations.length} reservations total
+        </p>
+        <div className="flex gap-2">
+          <Badge variant="secondary">{pending} Pending</Badge>
+          <Badge variant="default">{confirmed} Confirmed</Badge>
+          <Badge variant="destructive">{cancelled} Cancelled</Badge>
+        </div>
+      </div>
+
+      <div className="rounded-lg border border-border/60 bg-card overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="text-muted-foreground">Guest</TableHead>
+              <TableHead className="text-muted-foreground">Room</TableHead>
+              <TableHead className="text-muted-foreground">Dates</TableHead>
+              <TableHead className="text-muted-foreground">Guests</TableHead>
+              <TableHead className="text-muted-foreground">Total</TableHead>
+              <TableHead className="text-muted-foreground">Status</TableHead>
+              <TableHead className="text-right text-muted-foreground">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {reservations.map((res) => (
+              <TableRow key={res.id}>
+                <TableCell>
+                  <div>
+                    <p className="font-medium text-card-foreground">{res.guestName}</p>
+                    <p className="text-sm text-muted-foreground">
+                      {res.guestEmail}
+                    </p>
+                  </div>
+                </TableCell>
+                <TableCell className="text-card-foreground">{getRoomName(res.roomId)}</TableCell>
+                <TableCell>
+                  <div className="text-sm text-card-foreground">
+                    <p>{res.checkIn}</p>
+                    <p className="text-muted-foreground">to {res.checkOut}</p>
+                  </div>
+                </TableCell>
+                <TableCell className="text-card-foreground">{res.guests}</TableCell>
+                <TableCell className="font-medium text-card-foreground">
+                  ${res.totalPrice}
+                </TableCell>
+                <TableCell>
+                  <StatusBadge status={res.status} />
+                </TableCell>
+                <TableCell className="text-right">
+                  {res.status === "PENDING" && (
+                    <div className="flex justify-end gap-1">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="gap-1 bg-card text-card-foreground"
+                        onClick={() => updateStatus(res.id, "CONFIRMED")}
+                      >
+                        <Check className="h-3 w-3" />
+                        Confirm
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="gap-1 text-destructive hover:text-destructive bg-card"
+                        onClick={() => updateStatus(res.id, "CANCELLED")}
+                      >
+                        <X className="h-3 w-3" />
+                        Cancel
+                      </Button>
+                    </div>
+                  )}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    </div>
+  )
+}
