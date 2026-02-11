@@ -10,7 +10,7 @@ import { getCurrentUser } from "@/lib/auth"
 export async function GET(request: Request) {
   const user = await getCurrentUser()
   if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    return NextResponse.json({ error: "You have to be logged in" }, { status: 401 })
   }
 
   const { searchParams } = new URL(request.url)
@@ -27,7 +27,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   const user = await getCurrentUser()
   if (!user) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+    return NextResponse.json({ error: "You have to be logged in" }, { status: 401 })
   }
 
   const body = await request.json()

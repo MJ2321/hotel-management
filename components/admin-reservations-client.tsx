@@ -31,7 +31,19 @@ export function AdminReservationsClient({
   initialReservations: Reservation[]
   rooms: Room[]
 }) {
-  const [reservations, setReservations] = useState(initialReservations)
+  // API serializes dates as strings; parse them into Date objects for client use
+  function parseDates(r: Reservation) {
+    return {
+      ...r,
+      // support either Date or string
+      checkIn: r.checkIn instanceof Date ? r.checkIn : new Date(r.checkIn as any),
+      checkOut: r.checkOut instanceof Date ? r.checkOut : new Date(r.checkOut as any),
+    }
+  }
+
+  const [reservations, setReservations] = useState<Reservation[]>(
+    initialReservations.map(parseDates)
+  )
 
   function getRoomName(roomId: string) {
     const room = rooms.find((r) => r.id === roomId)
@@ -47,9 +59,8 @@ export function AdminReservationsClient({
       })
       if (!res.ok) throw new Error("Failed to update reservation")
       const updated = await res.json()
-      setReservations((prev) =>
-        prev.map((r) => (r.id === updated.id ? updated : r))
-      )
+      const parsed = parseDates(updated)
+      setReservations((prev) => prev.map((r) => (r.id === parsed.id ? parsed : r)))
       toast.success(`Reservation ${status.toLowerCase()}`)
     } catch {
       toast.error("Failed to update reservation")
@@ -59,6 +70,7 @@ export function AdminReservationsClient({
   const pending = reservations.filter((r) => r.status === "PENDING").length
   const confirmed = reservations.filter((r) => r.status === "CONFIRMED").length
   const cancelled = reservations.filter((r) => r.status === "CANCELLED").length
+  // console.log(reservations[0].checkIn.toDateString())
 
   return (
     <div>
@@ -100,8 +112,8 @@ export function AdminReservationsClient({
                 <TableCell className="text-card-foreground">{getRoomName(res.roomId)}</TableCell>
                 <TableCell>
                   <div className="text-sm text-card-foreground">
-                    <p>{res.checkIn}</p>
-                    <p className="text-muted-foreground">to {res.checkOut}</p>
+                    <p>{res.checkIn.toLocaleDateString()}</p>
+                    <p className="text-muted-foreground">to {res.checkOut.toLocaleDateString()}</p>
                   </div>
                 </TableCell>
                 <TableCell className="text-card-foreground">{res.guests}</TableCell>

@@ -17,28 +17,30 @@ import {
 } from "@/components/ui/form"
 import { useToast } from "@/hooks/use-toast"
 
-const loginSchema = z.object({
+const registerSchema = z.object({
+  name: z.string().min(2, "Name is too short"),
   email: z.string().email("Enter a valid email"),
   password: z.string().min(6, "Password must be at least 6 characters"),
 })
 
-type LoginValues = z.infer<typeof loginSchema>
+type RegisterValues = z.infer<typeof registerSchema>
 
-export function LoginForm() {
+export function RegisterForm() {
   const router = useRouter()
   const { toast } = useToast()
 
-  const form = useForm<LoginValues>({
-    resolver: zodResolver(loginSchema),
+  const form = useForm<RegisterValues>({
+    resolver: zodResolver(registerSchema),
     defaultValues: {
-      email: "anna@example.com",
-      password: "admin123",
+      name: "",
+      email: "",
+      password: "",
     },
   })
 
-  const onSubmit = async (values: LoginValues) => {
+  const onSubmit = async (values: RegisterValues) => {
     try {
-      const res = await fetch("/api/auth", {
+      const res = await fetch("/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(values),
@@ -46,15 +48,16 @@ export function LoginForm() {
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}))
-        throw new Error(data.error || "Login failed")
+        throw new Error(data.error || "Registration failed")
       }
 
-  toast({ title: "Logged in", description: "Welcome back!" })
+  toast({ title: "Account created", description: "Welcome!" })
   window.dispatchEvent(new Event("auth-changed"))
   router.push("/")
+  form.reset()
     } catch (error) {
       toast({
-        title: "Login error",
+        title: "Registration error",
         description: error instanceof Error ? error.message : "Unknown error",
         variant: "destructive",
       })
@@ -62,13 +65,27 @@ export function LoginForm() {
   }
 
   return (
-    <Card id="login" className="border-border/60 bg-card shadow-sm">
+    <Card className="border-border/60 bg-card shadow-sm">
       <CardHeader>
-        <CardTitle className="text-lg">Sign in</CardTitle>
+        <CardTitle className="text-lg">Register</CardTitle>
       </CardHeader>
       <CardContent>
         <Form {...form}>
           <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Full name</FormLabel>
+                  <FormControl>
+                    <Input autoComplete="name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <FormField
               control={form.control}
               name="email"
@@ -90,7 +107,7 @@ export function LoginForm() {
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input type="password" autoComplete="current-password" {...field} />
+                    <Input type="password" autoComplete="new-password" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -98,10 +115,10 @@ export function LoginForm() {
             />
 
             <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
-              {form.formState.isSubmitting ? "Signing in..." : "Sign in"}
+              {form.formState.isSubmitting ? "Registering..." : "Register"}
             </Button>
             <p className="text-xs text-muted-foreground">
-              Demo admin credentials: anna@example.com / admin123
+              New accounts get the USER role by default.
             </p>
           </form>
         </Form>

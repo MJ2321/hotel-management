@@ -32,7 +32,15 @@ export function AdminStaffClient({
 }: {
   initialStaff: Staff[]
 }) {
-  const [staff, setStaff] = useState(initialStaff)
+  // Ensure hireDate fields are real Date objects (API may serialize them as strings)
+  function parseStaff(s: Staff) {
+    return {
+      ...s,
+      hireDate: s.hireDate instanceof Date ? s.hireDate : new Date(s.hireDate as any),
+    }
+  }
+
+  const [staff, setStaff] = useState(initialStaff.map(parseStaff))
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editing, setEditing] = useState<Staff | null>(null)
   const [form, setForm] = useState({
@@ -86,9 +94,8 @@ export function AdminStaffClient({
         })
         if (!res.ok) throw new Error("Failed to update staff")
         const updated = await res.json()
-        setStaff((prev) =>
-          prev.map((s) => (s.id === updated.id ? updated : s))
-        )
+        const parsed = parseStaff(updated)
+        setStaff((prev) => prev.map((s) => (s.id === parsed.id ? parsed : s)))
         toast.success("Staff member updated")
       } else {
         const res = await fetch("/api/staff", {
@@ -98,7 +105,7 @@ export function AdminStaffClient({
         })
         if (!res.ok) throw new Error("Failed to create staff")
         const created = await res.json()
-        setStaff((prev) => [...prev, created])
+        setStaff((prev) => [...prev, parseStaff(created)])
         toast.success("Staff member added")
       }
       setDialogOpen(false)
@@ -250,7 +257,7 @@ export function AdminStaffClient({
                     <p className="text-muted-foreground">{member.phone}</p>
                   </div>
                 </TableCell>
-                <TableCell className="text-card-foreground">{member.hireDate}</TableCell>
+                <TableCell className="text-card-foreground">{member.hireDate.toDateString()}</TableCell>
                 <TableCell>
                   <Badge variant={member.active ? "default" : "secondary"}>
                     {member.active ? "Active" : "Inactive"}

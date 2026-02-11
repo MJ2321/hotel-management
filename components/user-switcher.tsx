@@ -54,7 +54,7 @@ export function UserSwitcher() {
   if (!currentUser)
     return (
       <Button asChild variant="outline" className="bg-card text-card-foreground">
-        <Link href="/#login">Login</Link>
+        <Link href="/auth">Login</Link>
       </Button>
     )
 

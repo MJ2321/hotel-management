@@ -122,8 +122,8 @@ export async function getReservationsByUserId(userId: string) {
 export async function createReservation(data: {
   userId: string
   roomId: string
-  checkIn: string
-  checkOut: string
+  checkIn: Date
+  checkOut: Date
   guests: number
   status: "PENDING" | "CONFIRMED" | "CANCELLED"
   guestName: string
