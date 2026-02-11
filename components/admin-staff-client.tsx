@@ -26,6 +26,8 @@ import { Switch } from "@/components/ui/switch"
 import type { Staff } from "@/lib/types"
 import { toast } from "sonner"
 import { Plus, Pencil, Trash2 } from "lucide-react"
+import { formatDate } from "@/lib/utils"
+
 
 export function AdminStaffClient({
   initialStaff,
@@ -257,7 +259,7 @@ export function AdminStaffClient({
                     <p className="text-muted-foreground">{member.phone}</p>
                   </div>
                 </TableCell>
-                <TableCell className="text-card-foreground">{member.hireDate.toDateString()}</TableCell>
+                <TableCell className="text-card-foreground">{formatDate(member.hireDate)}</TableCell>
                 <TableCell>
                   <Badge variant={member.active ? "default" : "secondary"}>
                     {member.active ? "Active" : "Inactive"}

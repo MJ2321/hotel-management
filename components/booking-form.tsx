@@ -2,64 +2,105 @@
 
 import React from "react"
 
-import { useState, useMemo } from "react"
+import { useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
+import { useForm } from "react-hook-form"
+import { z } from "zod"
+import { zodResolver } from "@hookform/resolvers/zod"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
 import type { Room } from "@/lib/types"
 import { toast } from "sonner"
-import { CalendarDays, Loader2 } from "lucide-react"
+import { CalendarDays, Loader2, ArrowRight, ArrowLeft } from "lucide-react"
+
+const dateString = z
+  .string()
+  .min(1, "Date is required")
+  .refine((val) => !Number.isNaN(new Date(val).getTime()), "Invalid date")
+
+const bookingSchema = (capacity: number) =>
+  z
+    .object({
+      checkIn: dateString,
+      checkOut: dateString,
+      guests: z.coerce
+        .number()
+        .min(1, "At least 1 guest")
+        .max(capacity, `Max ${capacity} guests`),
+      guestName: z.string().min(2, "Enter full name"),
+      guestEmail: z.string().email("Enter a valid email"),
+      guestPhone: z.string().optional(),
+    })
+    .refine(
+      (values) => new Date(values.checkOut).getTime() > new Date(values.checkIn).getTime(),
+      { message: "Check-out must be after check-in", path: ["checkOut"] }
+    )
+
+type BookingValues = z.infer<ReturnType<typeof bookingSchema>>
 
 export function BookingForm({ room }: { room: Room }) {
   const router = useRouter()
-  const [loading, setLoading] = useState(false)
-  const [form, setForm] = useState({
-    checkIn: "",
-    checkOut: "",
-    guests: "1",
-    guestName: "",
-    guestEmail: "",
-    guestPhone: "",
+  const [step, setStep] = useState<1 | 2>(1)
+
+  const form = useForm<BookingValues>({
+    resolver: zodResolver(bookingSchema(room.capacity)),
+    defaultValues: {
+      checkIn: "",
+      checkOut: "",
+      guests: 1,
+      guestName: "",
+      guestEmail: "",
+      guestPhone: "",
+    },
   })
 
+  const values = form.watch()
+
   const nights = useMemo(() => {
-    if (!form.checkIn || !form.checkOut) return 0
+    if (!values.checkIn || !values.checkOut) return 0
     const diff =
-      new Date(form.checkOut).getTime() - new Date(form.checkIn).getTime()
+      new Date(values.checkOut).getTime() - new Date(values.checkIn).getTime()
     return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)))
-  }, [form.checkIn, form.checkOut])
+  }, [values.checkIn, values.checkOut])
 
   const totalPrice = nights * room.pricePerNight
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }))
+  const goNext = async () => {
+    const valid = await form.trigger(["checkIn", "checkOut", "guests"], {
+      shouldFocus: true,
+    })
+    if (valid) setStep(2)
   }
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-
+  const onSubmit = async (values: BookingValues) => {
     if (nights <= 0) {
       toast.error("Please select valid check-in and check-out dates.")
+      setStep(1)
       return
     }
 
-    setLoading(true)
     try {
       const res = await fetch("/api/reservations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           roomId: room.id,
-          ...form,
-          guests: Number(form.guests),
+          ...values,
         }),
       })
 
       if (!res.ok) {
-        const data = await res.json()
+        const data = await res.json().catch(() => ({}))
         throw new Error(data.error || "Failed to create reservation")
       }
 
@@ -67,8 +108,6 @@ export function BookingForm({ room }: { room: Room }) {
       router.push("/my-reservations")
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Something went wrong")
-    } finally {
-      setLoading(false)
     }
   }
 
@@ -81,117 +120,187 @@ export function BookingForm({ room }: { room: Room }) {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <Label htmlFor="checkIn" className="text-card-foreground">Check-in</Label>
-              <Input
-                id="checkIn"
-                name="checkIn"
-                type="date"
-                required
-                value={form.checkIn}
-                onChange={handleChange}
-                className="mt-1.5 bg-card text-card-foreground"
-                min={new Date().toISOString().split("T")[0]}
-              />
-            </div>
-            <div>
-              <Label htmlFor="checkOut" className="text-card-foreground">Check-out</Label>
-              <Input
-                id="checkOut"
-                name="checkOut"
-                type="date"
-                required
-                value={form.checkOut}
-                onChange={handleChange}
-                className="mt-1.5 bg-card text-card-foreground"
-                min={form.checkIn || new Date().toISOString().split("T")[0]}
-              />
-            </div>
-          </div>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-4">
+            {step === 1 && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  <FormField
+                    control={form.control}
+                    name="checkIn"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Check-in</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="date"
+                            min={new Date().toISOString().split("T")[0]}
+                            className="bg-card text-card-foreground"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-          <div>
-            <Label htmlFor="guests" className="text-card-foreground">Number of Guests</Label>
-            <Input
-              id="guests"
-              name="guests"
-              type="number"
-              min="1"
-              max={room.capacity}
-              required
-              value={form.guests}
-              onChange={handleChange}
-              className="mt-1.5 bg-card text-card-foreground"
-            />
-          </div>
-
-          <Separator />
-
-          <div>
-            <Label htmlFor="guestName" className="text-card-foreground">Full Name</Label>
-            <Input
-              id="guestName"
-              name="guestName"
-              required
-              value={form.guestName}
-              onChange={handleChange}
-              placeholder="John Doe"
-              className="mt-1.5 bg-card text-card-foreground"
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="guestEmail" className="text-card-foreground">Email</Label>
-            <Input
-              id="guestEmail"
-              name="guestEmail"
-              type="email"
-              required
-              value={form.guestEmail}
-              onChange={handleChange}
-              placeholder="john@example.com"
-              className="mt-1.5 bg-card text-card-foreground"
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="guestPhone" className="text-card-foreground">Phone (optional)</Label>
-            <Input
-              id="guestPhone"
-              name="guestPhone"
-              type="tel"
-              value={form.guestPhone}
-              onChange={handleChange}
-              placeholder="+48 500 000 000"
-              className="mt-1.5 bg-card text-card-foreground"
-            />
-          </div>
-
-          {nights > 0 && (
-            <>
-              <Separator />
-              <div className="flex flex-col gap-1.5">
-                <div className="flex justify-between text-sm text-muted-foreground">
-                  <span>
-                    ${room.pricePerNight} x {nights}{" "}
-                    {nights === 1 ? "night" : "nights"}
-                  </span>
-                  <span>${totalPrice}</span>
+                  <FormField
+                    control={form.control}
+                    name="checkOut"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Check-out</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="date"
+                            min={values.checkIn || new Date().toISOString().split("T")[0]}
+                            className="bg-card text-card-foreground"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
                 </div>
-                <div className="flex justify-between text-lg font-bold text-card-foreground">
-                  <span>Total</span>
-                  <span className="text-primary">${totalPrice}</span>
+
+                <FormField
+                  control={form.control}
+                  name="guests"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Number of Guests</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          min={1}
+                          max={room.capacity}
+                          className="bg-card text-card-foreground"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {nights > 0 && (
+                  <>
+                    <Separator />
+                    <div className="flex flex-col gap-1.5">
+                      <div className="flex justify-between text-sm text-muted-foreground">
+                        <span>
+                          ${room.pricePerNight} x {nights} {nights === 1 ? "night" : "nights"}
+                        </span>
+                        <span>${totalPrice}</span>
+                      </div>
+                      <div className="flex justify-between text-lg font-bold text-card-foreground">
+                        <span>Total</span>
+                        <span className="text-primary">${totalPrice}</span>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                <div className="flex justify-end">
+                  <Button type="button" onClick={goNext} className="gap-2">
+                    Next
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
                 </div>
               </div>
-            </>
-          )}
+            )}
 
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {loading ? "Booking..." : "Reserve Now"}
-          </Button>
-        </form>
+            {step === 2 && (
+              <div className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="guestName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Full Name</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="John Doe"
+                          className="bg-card text-card-foreground"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="guestEmail"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="email"
+                          placeholder="john@example.com"
+                          className="bg-card text-card-foreground"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="guestPhone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Phone (optional)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="tel"
+                          placeholder="+48 500 000 000"
+                          className="bg-card text-card-foreground"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                {nights > 0 && (
+                  <>
+                    <Separator />
+                    <div className="flex flex-col gap-1.5">
+                      <div className="flex justify-between text-sm text-muted-foreground">
+                        <span>
+                          ${room.pricePerNight} x {nights} {nights === 1 ? "night" : "nights"}
+                        </span>
+                        <span>${totalPrice}</span>
+                      </div>
+                      <div className="flex justify-between text-lg font-bold text-card-foreground">
+                        <span>Total</span>
+                        <span className="text-primary">${totalPrice}</span>
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                <div className="flex items-center justify-between gap-2">
+                  <Button type="button" variant="outline" onClick={() => setStep(1)} className="gap-2">
+                    <ArrowLeft className="h-4 w-4" />
+                    Back
+                  </Button>
+                  <Button type="submit" className="gap-2" disabled={form.formState.isSubmitting}>
+                    {form.formState.isSubmitting && <Loader2 className="mr-1 h-4 w-4 animate-spin" />}
+                    {form.formState.isSubmitting ? "Booking..." : "Reserve Now"}
+                  </Button>
+                </div>
+              </div>
+            )}
+          </form>
+        </Form>
       </CardContent>
     </Card>
   )

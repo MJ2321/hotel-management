@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { CalendarDays, MapPin, Users, DollarSign } from "lucide-react"
 import type { ReservationStatus } from "@/lib/types"
+import { formatDate } from "@/lib/utils"
+
 
 function StatusBadge({ status }: { status: ReservationStatus }) {
   const variants: Record<ReservationStatus, "default" | "secondary" | "destructive"> = {
@@ -102,7 +104,7 @@ export default async function MyReservationsPage() {
                           </span>
                           <span className="flex items-center gap-2">
                             <CalendarDays className="h-4 w-4" />
-                            {new Date(reservation.checkIn).toLocaleDateString()} to {new Date(reservation.checkOut).toLocaleDateString()} (
+                            {formatDate(new Date(reservation.checkIn))} to {formatDate(new Date(reservation.checkOut))} (
                             {nights} {nights === 1 ? "night" : "nights"})
                           </span>
                           <span className="flex items-center gap-2">

@@ -1,6 +1,7 @@
 import { getRooms, getReservations, getStaff } from "@/lib/db"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { formatDate } from "@/lib/utils"
 import { BedDouble, CalendarDays, Users, DollarSign } from "lucide-react"
 
 export default async function AdminOverview() {
@@ -89,7 +90,7 @@ export default async function AdminOverview() {
                   <div>
                     <p className="font-medium text-card-foreground">{res.guestName}</p>
                     <p className="text-sm text-muted-foreground">
-                      {room?.name} &middot; {new Date(res.checkIn).toLocaleDateString()} to {new Date(res.checkOut).toLocaleDateString()}
+                      {room?.name} &middot; {formatDate(new Date(res.checkIn))} to {formatDate(new Date(res.checkOut))}
                     </p>
                   </div>
                   <div className="flex items-center gap-3">

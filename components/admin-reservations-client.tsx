@@ -14,6 +14,8 @@ import { Badge } from "@/components/ui/badge"
 import type { Reservation, Room, ReservationStatus } from "@/lib/types"
 import { toast } from "sonner"
 import { Check, X } from "lucide-react"
+import { formatDate } from "@/lib/utils"
+
 
 function StatusBadge({ status }: { status: ReservationStatus }) {
   const variants: Record<ReservationStatus, "default" | "secondary" | "destructive"> = {
@@ -70,7 +72,6 @@ export function AdminReservationsClient({
   const pending = reservations.filter((r) => r.status === "PENDING").length
   const confirmed = reservations.filter((r) => r.status === "CONFIRMED").length
   const cancelled = reservations.filter((r) => r.status === "CANCELLED").length
-  // console.log(reservations[0].checkIn.toDateString())
 
   return (
     <div>
@@ -112,8 +113,8 @@ export function AdminReservationsClient({
                 <TableCell className="text-card-foreground">{getRoomName(res.roomId)}</TableCell>
                 <TableCell>
                   <div className="text-sm text-card-foreground">
-                    <p>{res.checkIn.toLocaleDateString()}</p>
-                    <p className="text-muted-foreground">to {res.checkOut.toLocaleDateString()}</p>
+                    <p>{formatDate(res.checkIn)}</p>
+                    <p className="text-muted-foreground">to {formatDate(res.checkOut)}</p>
                   </div>
                 </TableCell>
                 <TableCell className="text-card-foreground">{res.guests}</TableCell>

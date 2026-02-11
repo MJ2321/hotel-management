@@ -1,0 +1,37 @@
+TailwindCSS
+Użycie media query
+Użycie pseudoklas (active, hover, focus, itp.)
+Użycie klasy container ++++++++++++++++++++++++++
+Użycie klasy group
+Użycie gotowej animacji lub utworzenie i użycie własnej
+Użycie container query* +++++++++++++++++++++++++
+
+TypeScript
+Użycie unii lub interesekcji
+Użycie wbudowanego typu generycznego (np. Partial, Required, Readonly, Pick, Omit, Required, Exclude, Record, Promise)
+Użycie przeciążeń funkcji
+Definiowanie typów dla stanów/    referencji +++++++++++
+Użycie predykatu typu +++++++++++++
+Utworzenie generycznego komponentu*
+
+React Hook Form & Zod
+Utworzenie dowolnego formularza za pomocą useForm
+Walidowanie formularza za pomocą zod schemy
+Podział formularza na kilka stepów z nawigacją umożliwiającą powrót i przejście dalej, gdy dany step jest wypełniony
+Użycie niestandardowej kontrolki
+Użycie dowolnego regex i refine przy definiowaniu schematów zod
+Dodanie reCAPTCHA* +++++++++++++++++++++++++
+
+Shadcn
+Integracja z React Hook Form za pomocą (ui.shadcn.com/docs/forms/react-hook-form )
+Użycie Dialog, Drawer lub AlertDialog
+Użycie Card, Item lub Table
+Użycie Tooltip, Popover lub Dropdown Menu
+Użycie dowolnego wykresu (ui.shadcn.com/charts/area)
+Stworzenie i użycie wlasnego komponentu UI działającego wg wzorca Compound Components*
+
+Inne
+Opublikowanie na vercel.com
+Użycie v0.app lub lovable.dev (należy upublicznić i przesłać link do konwersacji)
+Odpowiednie nazewnictwo zmiennych, clean code
+Ustna obrona projektu
