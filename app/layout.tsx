@@ -1,12 +1,17 @@
 import React from "react"
 import type { Metadata } from "next"
-import { Inter, Playfair_Display } from "next/font/google"
-import { Toaster } from "@/components/ui/sonner"
+import { Poppins } from "next/font/google"
+import { Toaster as SonnerToaster } from "@/components/ui/sonner"
+import { Toaster as CustomToaster } from "@/components/ui/toaster"
 
 import "./globals.css"
 
-const _inter = Inter({ subsets: ["latin"] })
-const _playfair = Playfair_Display({ subsets: ["latin"] })
+const poppins = Poppins({
+  subsets: ["latin"],
+  weight: ["300", "400", "600", "700"],
+  display: "swap",
+  variable: "--font-poppins",
+})
 
 export const metadata: Metadata = {
   title: "Grand Haven Hotel - Hotel Management System",
@@ -21,9 +26,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="font-sans antialiased">
+      <body className={`${poppins.className} antialiased`}>
         {children}
-        <Toaster />
+        <SonnerToaster />
+        <CustomToaster />
       </body>
     </html>
   )

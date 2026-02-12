@@ -11,6 +11,21 @@ import {
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import {
+  ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from "@/components/ui/chart"
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
 import type { Reservation, Room, ReservationStatus } from "@/lib/types"
 import { toast } from "sonner"
 import { Check, X } from "lucide-react"
@@ -73,9 +88,30 @@ export function AdminReservationsClient({
   const confirmed = reservations.filter((r) => r.status === "CONFIRMED").length
   const cancelled = reservations.filter((r) => r.status === "CANCELLED").length
 
+  const chartData: { status: ReservationStatus; label: string; value: number; fill: string }[] = [
+    { status: "CONFIRMED", label: "Zaakceptowane", value: confirmed, fill: "var(--color-CONFIRMED)" },
+    { status: "PENDING", label: "W toku", value: pending, fill: "var(--color-PENDING)" },
+    { status: "CANCELLED", label: "Odrzucone", value: cancelled, fill: "var(--color-CANCELLED)" },
+  ]
+
+  const chartConfig: ChartConfig = {
+    CONFIRMED: {
+      label: "Zaakceptowane",
+      color: "hsl(var(--chart-1))",
+    },
+    PENDING: {
+      label: "W toku",
+      color: "hsl(var(--chart-2))",
+    },
+    CANCELLED: {
+      label: "Odrzucone",
+      color: "hsl(var(--chart-3))",
+    },
+  }
+
   return (
-    <div>
-      <div className="mb-4 flex flex-wrap items-center gap-4">
+    <div className="space-y-6">
+      <div className="mb-2 flex flex-wrap items-center gap-4">
         <p className="text-sm text-muted-foreground">
           {reservations.length} reservations total
         </p>
@@ -85,6 +121,27 @@ export function AdminReservationsClient({
           <Badge variant="destructive">{cancelled} Cancelled</Badge>
         </div>
       </div>
+
+      <Card className="border-border/60 bg-card shadow-sm">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">Status rezerwacji</CardTitle>
+          <p className="text-sm text-muted-foreground">
+            Podsumowanie zaakceptowanych, odrzuconych i w toku rezerwacji
+          </p>
+        </CardHeader>
+        <CardContent className="pt-0">
+          <ChartContainer config={chartConfig} className="h-[260px]">
+            <BarChart data={chartData} margin={{ top: 10, right: 10, left: 10, bottom: 10 }}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} />
+              <XAxis dataKey="label" tickLine={false} axisLine={false} tickMargin={8} />
+              <YAxis allowDecimals={false} tickLine={false} axisLine={false} width={24} />
+              <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
+              <Bar dataKey="value" radius={[6, 6, 0, 0]} barSize={48} />
+              <ChartLegend content={<ChartLegendContent />} />
+            </BarChart>
+          </ChartContainer>
+        </CardContent>
+      </Card>
 
       <div className="rounded-lg border border-border/60 bg-card overflow-x-auto">
         <Table>

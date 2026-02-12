@@ -16,6 +16,9 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { useToast } from "@/hooks/use-toast"
+import ReCAPTCHA from "react-google-recaptcha"
+import { useState } from "react"
+
 
 const registerSchema = z.object({
   name: z.string().min(2, "Name is too short"),
@@ -28,6 +31,8 @@ type RegisterValues = z.infer<typeof registerSchema>
 export function RegisterForm() {
   const router = useRouter()
   const { toast } = useToast()
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
+  
 
   const form = useForm<RegisterValues>({
     resolver: zodResolver(registerSchema),
@@ -39,6 +44,15 @@ export function RegisterForm() {
   })
 
   const onSubmit = async (values: RegisterValues) => {
+    if (!captchaToken) {
+      toast({
+        title: "reCAPTCHA required",
+        description: "Please verify that you are not a robot before signing in.",
+        variant: "destructive",
+      })
+      return
+    }
+
     try {
       const res = await fetch("/api/register", {
         method: "POST",
@@ -113,6 +127,13 @@ export function RegisterForm() {
                 </FormItem>
               )}
             />
+
+            <div className="flex justify-center">
+              <ReCAPTCHA
+                sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || ""}
+                onChange={(token: string | null) => setCaptchaToken(token)}
+              />
+            </div>
 
             <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
               {form.formState.isSubmitting ? "Registering..." : "Register"}

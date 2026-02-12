@@ -69,11 +69,11 @@ export function UserSwitcher() {
           </Badge>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-52">
+      <DropdownMenuContent align="end" className="w-full">
         <DropdownMenuLabel className="flex items-center gap-2">
           Signed in as <span className="font-medium">{currentUser.email}</span>
         </DropdownMenuLabel>
-        <DropdownMenuItem onClick={logout} className="gap-2 text-red-600">
+        <DropdownMenuItem onClick={logout} className="gap-2 text-red-600 cursor-pointer">
           <LogOut className="h-4 w-4" /> Logout
         </DropdownMenuItem>
       </DropdownMenuContent>

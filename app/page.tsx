@@ -109,39 +109,6 @@ function FeaturesSection() {
   )
 }
 
-function CtaAuthSection() {
-  return (
-    <section className="bg-secondary/40 py-16">
-      <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 lg:flex-row lg:items-center lg:justify-between lg:px-8">
-        <div className="space-y-3">
-          <Badge variant="secondary" className="w-fit bg-primary/10 text-primary border-primary/20">
-            Account access
-          </Badge>
-          <h2 className="font-serif text-3xl font-bold text-foreground text-balance">
-            Manage your stay securely
-          </h2>
-          <p className="text-muted-foreground max-w-xl">
-            Sign in or create an account to manage reservations. Admin users automatically see the admin panel link when logged in.
-          </p>
-        </div>
-        <div className="flex gap-3">
-          <Button size="lg" asChild className="text-base">
-            <Link href="/auth">Go to auth page</Link>
-          </Button>
-          <Button
-            size="lg"
-            variant="outline"
-            asChild
-            className="border-card/30 bg-card/10 text-card backdrop-blur-sm hover:bg-card/20 hover:text-card text-base"
-          >
-            <Link href="/rooms">Browse rooms</Link>
-          </Button>
-        </div>
-      </div>
-    </section>
-  )
-}
-
 async function FeaturedRoomsSection() {
   const rooms = (await getRooms()).slice(0, 3)
 
@@ -213,7 +180,6 @@ export default function HomePage() {
       <Navigation />
       <main>
   <HeroSection />
-  <CtaAuthSection />
   <FeaturesSection />
         <FeaturedRoomsSection />
       </main>

@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
+import { useState } from "react"
 import { z } from "zod"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -16,6 +17,7 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { useToast } from "@/hooks/use-toast"
+import ReCAPTCHA from "react-google-recaptcha"
 
 const loginSchema = z.object({
   email: z.string().email("Enter a valid email"),
@@ -27,6 +29,7 @@ type LoginValues = z.infer<typeof loginSchema>
 export function LoginForm() {
   const router = useRouter()
   const { toast } = useToast()
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
 
   const form = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
@@ -37,11 +40,20 @@ export function LoginForm() {
   })
 
   const onSubmit = async (values: LoginValues) => {
+    if (!captchaToken) {
+      toast({
+        title: "reCAPTCHA required",
+        description: "Please verify that you are not a robot before signing in.",
+        variant: "destructive",
+      })
+      return
+    }
+
     try {
       const res = await fetch("/api/auth", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(values),
+        body: JSON.stringify({ ...values, captchaToken }),
       })
 
       if (!res.ok) {
@@ -49,9 +61,9 @@ export function LoginForm() {
         throw new Error(data.error || "Login failed")
       }
 
-  toast({ title: "Logged in", description: "Welcome back!" })
-  window.dispatchEvent(new Event("auth-changed"))
-  router.push("/")
+      toast({ title: "Logged in", description: "Welcome back!" })
+      window.dispatchEvent(new Event("auth-changed"))
+      router.push("/")
     } catch (error) {
       toast({
         title: "Login error",
@@ -96,6 +108,13 @@ export function LoginForm() {
                 </FormItem>
               )}
             />
+
+            <div className="flex justify-center">
+              <ReCAPTCHA
+                sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || ""}
+                onChange={(token: string | null) => setCaptchaToken(token)}
+              />
+            </div>
 
             <Button type="submit" className="w-full" disabled={form.formState.isSubmitting}>
               {form.formState.isSubmitting ? "Signing in..." : "Sign in"}
