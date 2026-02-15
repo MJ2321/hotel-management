@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import { useState } from "react"
+import { useState } from "react";
 import {
   Table,
   TableBody,
@@ -8,15 +8,10 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   ChartContainer,
   ChartLegend,
@@ -24,47 +19,51 @@ import {
   ChartTooltip,
   ChartTooltipContent,
   type ChartConfig,
-} from "@/components/ui/chart"
-import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts"
-import type { Reservation, Room, ReservationStatus } from "@/lib/types"
-import { toast } from "sonner"
-import { Check, X } from "lucide-react"
-import { formatDate } from "@/lib/utils"
-
+} from "@/components/ui/chart";
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import type { Reservation, Room, ReservationStatus } from "@/lib/types";
+import { toast } from "sonner";
+import { Check, X } from "lucide-react";
+import { formatDate } from "@/lib/utils";
 
 function StatusBadge({ status }: { status: ReservationStatus }) {
-  const variants: Record<ReservationStatus, "default" | "secondary" | "destructive"> = {
+  const variants: Record<
+    ReservationStatus,
+    "default" | "secondary" | "destructive"
+  > = {
     PENDING: "secondary",
     CONFIRMED: "default",
     CANCELLED: "destructive",
-  }
-  return <Badge variant={variants[status]}>{status}</Badge>
+  };
+  return <Badge variant={variants[status]}>{status}</Badge>;
 }
 
 export function AdminReservationsClient({
   initialReservations,
   rooms,
 }: {
-  initialReservations: Reservation[]
-  rooms: Room[]
+  initialReservations: Reservation[];
+  rooms: Room[];
 }) {
   // API serializes dates as strings; parse them into Date objects for client use
   function parseDates(r: Reservation) {
     return {
       ...r,
       // support either Date or string
-      checkIn: r.checkIn instanceof Date ? r.checkIn : new Date(r.checkIn as any),
-      checkOut: r.checkOut instanceof Date ? r.checkOut : new Date(r.checkOut as any),
-    }
+      checkIn:
+        r.checkIn instanceof Date ? r.checkIn : new Date(r.checkIn as any),
+      checkOut:
+        r.checkOut instanceof Date ? r.checkOut : new Date(r.checkOut as any),
+    };
   }
 
   const [reservations, setReservations] = useState<Reservation[]>(
-    initialReservations.map(parseDates)
-  )
+    initialReservations.map(parseDates),
+  );
 
   function getRoomName(roomId: string) {
-    const room = rooms.find((r) => r.id === roomId)
-    return room ? `${room.name} (#${room.number})` : "Unknown"
+    const room = rooms.find((r) => r.id === roomId);
+    return room ? `${room.name} (#${room.number})` : "Unknown";
   }
 
   async function updateStatus(id: string, status: ReservationStatus) {
@@ -73,26 +72,48 @@ export function AdminReservationsClient({
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status }),
-      })
-      if (!res.ok) throw new Error("Failed to update reservation")
-      const updated = await res.json()
-      const parsed = parseDates(updated)
-      setReservations((prev) => prev.map((r) => (r.id === parsed.id ? parsed : r)))
-      toast.success(`Reservation ${status.toLowerCase()}`)
+      });
+      if (!res.ok) throw new Error("Failed to update reservation");
+      const updated = await res.json();
+      const parsed = parseDates(updated);
+      setReservations((prev) =>
+        prev.map((r) => (r.id === parsed.id ? parsed : r)),
+      );
+      toast.success(`Reservation ${status.toLowerCase()}`);
     } catch {
-      toast.error("Failed to update reservation")
+      toast.error("Failed to update reservation");
     }
   }
 
-  const pending = reservations.filter((r) => r.status === "PENDING").length
-  const confirmed = reservations.filter((r) => r.status === "CONFIRMED").length
-  const cancelled = reservations.filter((r) => r.status === "CANCELLED").length
+  const pending = reservations.filter((r) => r.status === "PENDING").length;
+  const confirmed = reservations.filter((r) => r.status === "CONFIRMED").length;
+  const cancelled = reservations.filter((r) => r.status === "CANCELLED").length;
 
-  const chartData: { status: ReservationStatus; label: string; value: number; fill: string }[] = [
-    { status: "CONFIRMED", label: "Zaakceptowane", value: confirmed, fill: "var(--color-CONFIRMED)" },
-    { status: "PENDING", label: "W toku", value: pending, fill: "var(--color-PENDING)" },
-    { status: "CANCELLED", label: "Odrzucone", value: cancelled, fill: "var(--color-CANCELLED)" },
-  ]
+  const chartData: {
+    status: ReservationStatus;
+    label: string;
+    value: number;
+    fill: string;
+  }[] = [
+    {
+      status: "CONFIRMED",
+      label: "Zaakceptowane",
+      value: confirmed,
+      fill: "var(--color-CONFIRMED)",
+    },
+    {
+      status: "PENDING",
+      label: "W toku",
+      value: pending,
+      fill: "var(--color-PENDING)",
+    },
+    {
+      status: "CANCELLED",
+      label: "Odrzucone",
+      value: cancelled,
+      fill: "var(--color-CANCELLED)",
+    },
+  ];
 
   const chartConfig: ChartConfig = {
     CONFIRMED: {
@@ -107,7 +128,7 @@ export function AdminReservationsClient({
       label: "Odrzucone",
       color: "hsl(var(--chart-3))",
     },
-  }
+  };
 
   return (
     <div className="space-y-6">
@@ -131,10 +152,23 @@ export function AdminReservationsClient({
         </CardHeader>
         <CardContent className="pt-0">
           <ChartContainer config={chartConfig} className="h-[260px]">
-            <BarChart data={chartData} margin={{ top: 10, right: 10, left: 10, bottom: 10 }}>
+            <BarChart
+              data={chartData}
+              margin={{ top: 10, right: 10, left: 10, bottom: 10 }}
+            >
               <CartesianGrid strokeDasharray="3 3" vertical={false} />
-              <XAxis dataKey="label" tickLine={false} axisLine={false} tickMargin={8} />
-              <YAxis allowDecimals={false} tickLine={false} axisLine={false} width={24} />
+              <XAxis
+                dataKey="label"
+                tickLine={false}
+                axisLine={false}
+                tickMargin={8}
+              />
+              <YAxis
+                allowDecimals={false}
+                tickLine={false}
+                axisLine={false}
+                width={24}
+              />
               <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
               <Bar dataKey="value" radius={[6, 6, 0, 0]} barSize={48} />
               <ChartLegend content={<ChartLegendContent />} />
@@ -153,7 +187,9 @@ export function AdminReservationsClient({
               <TableHead className="text-muted-foreground">Guests</TableHead>
               <TableHead className="text-muted-foreground">Total</TableHead>
               <TableHead className="text-muted-foreground">Status</TableHead>
-              <TableHead className="text-right text-muted-foreground">Actions</TableHead>
+              <TableHead className="text-right text-muted-foreground">
+                Actions
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -161,20 +197,28 @@ export function AdminReservationsClient({
               <TableRow key={res.id}>
                 <TableCell>
                   <div>
-                    <p className="font-medium text-card-foreground">{res.guestName}</p>
+                    <p className="font-medium text-card-foreground">
+                      {res.guestName}
+                    </p>
                     <p className="text-sm text-muted-foreground">
                       {res.guestEmail}
                     </p>
                   </div>
                 </TableCell>
-                <TableCell className="text-card-foreground">{getRoomName(res.roomId)}</TableCell>
+                <TableCell className="text-card-foreground">
+                  {getRoomName(res.roomId)}
+                </TableCell>
                 <TableCell>
                   <div className="text-sm text-card-foreground">
                     <p>{formatDate(res.checkIn)}</p>
-                    <p className="text-muted-foreground">to {formatDate(res.checkOut)}</p>
+                    <p className="text-muted-foreground">
+                      to {formatDate(res.checkOut)}
+                    </p>
                   </div>
                 </TableCell>
-                <TableCell className="text-card-foreground">{res.guests}</TableCell>
+                <TableCell className="text-card-foreground">
+                  {res.guests}
+                </TableCell>
                 <TableCell className="font-medium text-card-foreground">
                   ${res.totalPrice}
                 </TableCell>
@@ -211,5 +255,5 @@ export function AdminReservationsClient({
         </Table>
       </div>
     </div>
-  )
+  );
 }

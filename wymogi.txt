@@ -1,10 +1,10 @@
 TailwindCSS
 Użycie media query
 Użycie pseudoklas (active, hover, focus, itp.)
-Użycie klasy container ++++++++++++++++++++++++++
+Użycie klasy container 
 Użycie klasy group
 Użycie gotowej animacji lub utworzenie i użycie własnej
-Użycie container query* +++++++++++++++++++++++++
+Użycie container query* 
 
 TypeScript
 Użycie unii lub interesekcji
@@ -20,7 +20,7 @@ Walidowanie formularza za pomocą zod schemy
 Podział formularza na kilka stepów z nawigacją umożliwiającą powrót i przejście dalej, gdy dany step jest wypełniony
 Użycie niestandardowej kontrolki
 Użycie dowolnego regex i refine przy definiowaniu schematów zod
-Dodanie reCAPTCHA* +++++++++++++++++++++++++
+Dodanie reCAPTCHA* 
 
 Shadcn
 Integracja z React Hook Form za pomocą (ui.shadcn.com/docs/forms/react-hook-form )
