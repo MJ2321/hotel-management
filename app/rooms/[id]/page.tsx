@@ -1,31 +1,30 @@
-import { Navigation } from "@/components/navigation"
-import { getRoomById } from "@/lib/db"
-import { notFound } from "next/navigation"
-import Image from "next/image"
-import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { BookingForm } from "@/components/booking-form"
-import { Users, Check } from "lucide-react"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
+import { Navigation } from "@/components/navigation";
+import { getRoomById } from "@/lib/db";
+import { notFound } from "next/navigation";
+import Image from "next/image";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { BookingForm } from "@/components/booking-form";
+import { Users, Check } from "lucide-react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export default async function RoomDetailPage({
   params,
 }: {
-  params: Promise<{ id: string }>
+  params: Promise<{ id: string }>;
 }) {
-  const { id } = await params
-  const room = await getRoomById(id)
+  const { id } = await params;
+  const room = await getRoomById(id);
 
   if (!room) {
-    notFound()
+    notFound();
   }
 
   return (
     <div className="min-h-screen">
       <Navigation />
       <main className="mx-auto max-w-7xl px-4 py-10 lg:px-8">
-        {/* Breadcrumb */}
         <nav className="mb-6 flex items-center gap-2 text-sm text-muted-foreground">
           <Link href="/" className="hover:text-foreground">
             Home
@@ -39,7 +38,6 @@ export default async function RoomDetailPage({
         </nav>
 
         <div className="grid gap-8 lg:grid-cols-3">
-          {/* Room info */}
           <div className="lg:col-span-2">
             <div className="relative aspect-[16/9] overflow-hidden rounded-lg">
               <Image
@@ -87,10 +85,11 @@ export default async function RoomDetailPage({
                 {room.description}
               </p>
 
-              {/* Amenities */}
               <Card className="mt-8 border-border/60 bg-card">
                 <CardHeader>
-                  <CardTitle className="text-lg text-card-foreground">Amenities</CardTitle>
+                  <CardTitle className="text-lg text-card-foreground">
+                    Amenities
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -109,7 +108,6 @@ export default async function RoomDetailPage({
             </div>
           </div>
 
-          {/* Booking sidebar */}
           <div className="lg:col-span-1">
             <div className="sticky top-24">
               {room.available ? (
@@ -131,5 +129,5 @@ export default async function RoomDetailPage({
         </div>
       </main>
     </div>
-  )
+  );
 }

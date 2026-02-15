@@ -1,41 +1,40 @@
-import { NextResponse } from "next/server"
-import bcrypt from "bcryptjs"
-import { getCurrentUser, setCurrentUser, clearCurrentUser } from "@/lib/auth"
-import { prisma } from "@/lib/prisma"
+import { NextResponse } from "next/server";
+import bcrypt from "bcryptjs";
+import { getCurrentUser, setCurrentUser, clearCurrentUser } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 
-// Get current user session
 export async function GET() {
-  const user = await getCurrentUser()
-  return NextResponse.json({ user })
+  const user = await getCurrentUser();
+  return NextResponse.json({ user });
 }
 
-// Login with email/password
 export async function POST(request: Request) {
-  const body = await request.json()
-  const { email, password } = body
+  const body = await request.json();
+  const { email, password } = body;
 
   if (!email || !password) {
-    return NextResponse.json({ error: "Missing email or password" }, { status: 400 })
+    return NextResponse.json(
+      { error: "Missing email or password" },
+      { status: 400 },
+    );
   }
 
-  // Types are outdated before regeneration; select all fields and cast
-  const user = (await prisma.user.findUnique({ where: { email } })) as any
+  const user = (await prisma.user.findUnique({ where: { email } })) as any;
   if (!user || !user.password) {
-    return NextResponse.json({ error: "Invalid credentials" }, { status: 401 })
+    return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
   }
 
-  const valid = await bcrypt.compare(password, user.password)
+  const valid = await bcrypt.compare(password, user.password);
   if (!valid) {
-    return NextResponse.json({ error: "Invalid credentials" }, { status: 401 })
+    return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
   }
 
-  await setCurrentUser(user.id)
-  const { password: _pw, ...safeUser } = user
-  return NextResponse.json({ user: safeUser })
+  await setCurrentUser(user.id);
+  const { password: _pw, ...safeUser } = user;
+  return NextResponse.json({ user: safeUser });
 }
 
-// Logout
 export async function DELETE() {
-  await clearCurrentUser()
-  return NextResponse.json({ success: true })
+  await clearCurrentUser();
+  return NextResponse.json({ success: true });
 }

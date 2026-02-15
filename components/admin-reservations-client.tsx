@@ -45,11 +45,9 @@ export function AdminReservationsClient({
   initialReservations: Reservation[];
   rooms: Room[];
 }) {
-  // API serializes dates as strings; parse them into Date objects for client use
   function parseDates(r: Reservation) {
     return {
       ...r,
-      // support either Date or string
       checkIn:
         r.checkIn instanceof Date ? r.checkIn : new Date(r.checkIn as any),
       checkOut:
@@ -60,6 +58,11 @@ export function AdminReservationsClient({
   const [reservations, setReservations] = useState<Reservation[]>(
     initialReservations.map(parseDates),
   );
+
+  const byStatus =
+    (status: ReservationStatus) =>
+    (r: Reservation): r is Reservation =>
+      r.status === status;
 
   function getRoomName(roomId: string) {
     const room = rooms.find((r) => r.id === roomId);
@@ -85,9 +88,9 @@ export function AdminReservationsClient({
     }
   }
 
-  const pending = reservations.filter((r) => r.status === "PENDING").length;
-  const confirmed = reservations.filter((r) => r.status === "CONFIRMED").length;
-  const cancelled = reservations.filter((r) => r.status === "CANCELLED").length;
+  const pending = reservations.filter(byStatus("PENDING")).length;
+  const confirmed = reservations.filter(byStatus("CONFIRMED")).length;
+  const cancelled = reservations.filter(byStatus("CANCELLED")).length;
 
   const chartData: {
     status: ReservationStatus;
@@ -97,19 +100,19 @@ export function AdminReservationsClient({
   }[] = [
     {
       status: "CONFIRMED",
-      label: "Zaakceptowane",
+      label: "Confirmed",
       value: confirmed,
       fill: "var(--color-CONFIRMED)",
     },
     {
       status: "PENDING",
-      label: "W toku",
+      label: "Pending",
       value: pending,
       fill: "var(--color-PENDING)",
     },
     {
       status: "CANCELLED",
-      label: "Odrzucone",
+      label: "Cancelled",
       value: cancelled,
       fill: "var(--color-CANCELLED)",
     },
@@ -145,9 +148,9 @@ export function AdminReservationsClient({
 
       <Card className="border-border/60 bg-card shadow-sm">
         <CardHeader className="pb-2">
-          <CardTitle className="text-base">Status rezerwacji</CardTitle>
+          <CardTitle className="text-base">Reservations status</CardTitle>
           <p className="text-sm text-muted-foreground">
-            Podsumowanie zaakceptowanych, odrzuconych i w toku rezerwacji
+            Summary of confirmed, cancelled and pending reservations
           </p>
         </CardHeader>
         <CardContent className="pt-0">

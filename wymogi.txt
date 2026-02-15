@@ -11,7 +11,7 @@ Użycie unii lub interesekcji
 Użycie wbudowanego typu generycznego (np. Partial, Required, Readonly, Pick, Omit, Required, Exclude, Record, Promise)
 Użycie przeciążeń funkcji
 Definiowanie typów dla stanów/    referencji +++++++++++
-Użycie predykatu typu +++++++++++++
+Użycie predykatu typu 
 Utworzenie generycznego komponentu*
 
 React Hook Form & Zod

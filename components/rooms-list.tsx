@@ -1,41 +1,50 @@
-"use client"
+"use client";
 
-import { useState, useMemo } from "react"
-import { RoomFilters } from "@/components/room-filters"
-import { RoomCard } from "@/components/room-card"
-import type { Room } from "@/lib/types"
+import { useState, useMemo } from "react";
+import { RoomFilters } from "@/components/room-filters";
+import { RoomCard } from "@/components/room-card";
+import type { Room } from "@/lib/types";
 
 export function RoomsList({ rooms }: { rooms: Room[] }) {
   const [filters, setFilters] = useState({
     capacity: "any",
     maxPrice: "",
     type: "all",
-  })
+  });
+
+  const isFiniteNumber = (value: number): value is number =>
+    Number.isFinite(value);
 
   const filteredRooms = useMemo(() => {
-    let result = [...rooms]
+    let result = [...rooms];
 
     if (filters.capacity && filters.capacity !== "any") {
-      result = result.filter((r) => r.capacity >= Number(filters.capacity))
+      const capacity = Number(filters.capacity);
+      if (isFiniteNumber(capacity)) {
+        result = result.filter((r) => r.capacity >= capacity);
+      }
     }
 
     if (filters.maxPrice) {
-      result = result.filter((r) => r.pricePerNight <= Number(filters.maxPrice))
+      const maxPrice = Number(filters.maxPrice);
+      if (isFiniteNumber(maxPrice)) {
+        result = result.filter((r) => r.pricePerNight <= maxPrice);
+      }
     }
 
     if (filters.type && filters.type !== "all") {
-      result = result.filter((r) => r.type === filters.type)
+      result = result.filter((r) => r.type === filters.type);
     }
 
-    return result
-  }, [rooms, filters])
+    return result;
+  }, [rooms, filters]);
 
   function handleFilterChange(key: string, value: string) {
-    setFilters((prev) => ({ ...prev, [key]: value }))
+    setFilters((prev) => ({ ...prev, [key]: value }));
   }
 
   function handleReset() {
-    setFilters({ capacity: "any", maxPrice: "", type: "all" })
+    setFilters({ capacity: "any", maxPrice: "", type: "all" });
   }
 
   return (
@@ -66,5 +75,5 @@ export function RoomsList({ rooms }: { rooms: Room[] }) {
         Showing {filteredRooms.length} of {rooms.length} rooms
       </p>
     </div>
-  )
+  );
 }

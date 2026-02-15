@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import React from "react"
+import React from "react";
 
-import { useState } from "react"
+import { useState } from "react";
 import {
   Table,
   TableBody,
@@ -10,41 +10,36 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Switch } from "@/components/ui/switch"
-import type { Staff } from "@/lib/types"
-import { toast } from "sonner"
-import { Plus, Pencil, Trash2 } from "lucide-react"
-import { formatDate } from "@/lib/utils"
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import type { Staff } from "@/lib/types";
+import { toast } from "sonner";
+import { Plus, Pencil, Trash2 } from "lucide-react";
+import { formatDate } from "@/lib/utils";
 
-
-export function AdminStaffClient({
-  initialStaff,
-}: {
-  initialStaff: Staff[]
-}) {
-  // Ensure hireDate fields are real Date objects (API may serialize them as strings)
+export function AdminStaffClient({ initialStaff }: { initialStaff: Staff[] }) {
   function parseStaff(s: Staff) {
     return {
       ...s,
-      hireDate: s.hireDate instanceof Date ? s.hireDate : new Date(s.hireDate as any),
-    }
+      hireDate:
+        s.hireDate instanceof Date ? s.hireDate : new Date(s.hireDate as any),
+    };
   }
 
-  const [staff, setStaff] = useState(initialStaff.map(parseStaff))
-  const [dialogOpen, setDialogOpen] = useState(false)
-  const [editing, setEditing] = useState<Staff | null>(null)
+  const [staff, setStaff] = useState(initialStaff.map(parseStaff));
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editing, setEditing] = useState<Staff | null>(null);
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -52,7 +47,7 @@ export function AdminStaffClient({
     position: "",
     department: "",
     active: true,
-  })
+  });
 
   function resetForm() {
     setForm({
@@ -62,17 +57,17 @@ export function AdminStaffClient({
       position: "",
       department: "",
       active: true,
-    })
-    setEditing(null)
+    });
+    setEditing(null);
   }
 
   function openCreate() {
-    resetForm()
-    setDialogOpen(true)
+    resetForm();
+    setDialogOpen(true);
   }
 
   function openEdit(member: Staff) {
-    setEditing(member)
+    setEditing(member);
     setForm({
       name: member.name,
       email: member.email,
@@ -80,12 +75,12 @@ export function AdminStaffClient({
       position: member.position,
       department: member.department,
       active: member.active,
-    })
-    setDialogOpen(true)
+    });
+    setDialogOpen(true);
   }
 
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
+    e.preventDefault();
 
     try {
       if (editing) {
@@ -93,42 +88,42 @@ export function AdminStaffClient({
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(form),
-        })
-        if (!res.ok) throw new Error("Failed to update staff")
-        const updated = await res.json()
-        const parsed = parseStaff(updated)
-        setStaff((prev) => prev.map((s) => (s.id === parsed.id ? parsed : s)))
-        toast.success("Staff member updated")
+        });
+        if (!res.ok) throw new Error("Failed to update staff");
+        const updated = await res.json();
+        const parsed = parseStaff(updated);
+        setStaff((prev) => prev.map((s) => (s.id === parsed.id ? parsed : s)));
+        toast.success("Staff member updated");
       } else {
         const res = await fetch("/api/staff", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(form),
-        })
-        if (!res.ok) throw new Error("Failed to create staff")
-        const created = await res.json()
-        setStaff((prev) => [...prev, parseStaff(created)])
-        toast.success("Staff member added")
+        });
+        if (!res.ok) throw new Error("Failed to create staff");
+        const created = await res.json();
+        setStaff((prev) => [...prev, parseStaff(created)]);
+        toast.success("Staff member added");
       }
-      setDialogOpen(false)
-      resetForm()
+      setDialogOpen(false);
+      resetForm();
     } catch {
-      toast.error("Something went wrong")
+      toast.error("Something went wrong");
     }
   }
 
   async function handleDelete(id: string) {
     try {
-      const res = await fetch(`/api/staff/${id}`, { method: "DELETE" })
-      if (!res.ok) throw new Error("Failed to delete")
-      setStaff((prev) => prev.filter((s) => s.id !== id))
-      toast.success("Staff member removed")
+      const res = await fetch(`/api/staff/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete");
+      setStaff((prev) => prev.filter((s) => s.id !== id));
+      toast.success("Staff member removed");
     } catch {
-      toast.error("Failed to delete staff member")
+      toast.error("Failed to delete staff member");
     }
   }
 
-  const activeCount = staff.filter((s) => s.active).length
+  const activeCount = staff.filter((s) => s.active).length;
 
   return (
     <div>
@@ -217,9 +212,7 @@ export function AdminStaffClient({
               <div className="flex items-center gap-3">
                 <Switch
                   checked={form.active}
-                  onCheckedChange={(v) =>
-                    setForm((p) => ({ ...p, active: v }))
-                  }
+                  onCheckedChange={(v) => setForm((p) => ({ ...p, active: v }))}
                 />
                 <Label className="text-foreground">Active</Label>
               </div>
@@ -238,11 +231,15 @@ export function AdminStaffClient({
             <TableRow>
               <TableHead className="text-muted-foreground">Name</TableHead>
               <TableHead className="text-muted-foreground">Position</TableHead>
-              <TableHead className="text-muted-foreground">Department</TableHead>
+              <TableHead className="text-muted-foreground">
+                Department
+              </TableHead>
               <TableHead className="text-muted-foreground">Contact</TableHead>
               <TableHead className="text-muted-foreground">Hired</TableHead>
               <TableHead className="text-muted-foreground">Status</TableHead>
-              <TableHead className="text-right text-muted-foreground">Actions</TableHead>
+              <TableHead className="text-right text-muted-foreground">
+                Actions
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -251,15 +248,21 @@ export function AdminStaffClient({
                 <TableCell className="font-medium text-card-foreground">
                   {member.name}
                 </TableCell>
-                <TableCell className="text-card-foreground">{member.position}</TableCell>
-                <TableCell className="text-card-foreground">{member.department}</TableCell>
+                <TableCell className="text-card-foreground">
+                  {member.position}
+                </TableCell>
+                <TableCell className="text-card-foreground">
+                  {member.department}
+                </TableCell>
                 <TableCell>
                   <div className="text-sm">
                     <p className="text-card-foreground">{member.email}</p>
                     <p className="text-muted-foreground">{member.phone}</p>
                   </div>
                 </TableCell>
-                <TableCell className="text-card-foreground">{formatDate(member.hireDate)}</TableCell>
+                <TableCell className="text-card-foreground">
+                  {formatDate(member.hireDate)}
+                </TableCell>
                 <TableCell>
                   <Badge variant={member.active ? "default" : "secondary"}>
                     {member.active ? "Active" : "Inactive"}
@@ -292,5 +295,5 @@ export function AdminStaffClient({
         </Table>
       </div>
     </div>
-  )
+  );
 }

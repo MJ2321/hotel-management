@@ -1,21 +1,21 @@
-import { prisma } from "@/lib/prisma"
-import { NextResponse } from "next/server"
-import bcrypt from "bcryptjs"
+import { prisma } from "@/lib/prisma";
+import { NextResponse } from "next/server";
+import bcrypt from "bcryptjs";
 
 const hashPassword = (name: string) => {
-  const firstName = name.split(" ")[0]?.toLowerCase() ?? "user"
-  return bcrypt.hash(`${firstName}123`, 10)
-}
+  const firstName = name.split(" ")[0]?.toLowerCase() ?? "user";
+  return bcrypt.hash(`${firstName}123`, 10);
+};
 
 export async function POST() {
   try {
-    console.log("🌱 Seeding database...")
+    console.log("🌱 Seeding database...");
 
     // Clean existing data
-    await prisma.reservation.deleteMany()
-    await prisma.staff.deleteMany()
-    await prisma.room.deleteMany()
-    await prisma.user.deleteMany()
+    await prisma.reservation.deleteMany();
+    await prisma.staff.deleteMany();
+    await prisma.room.deleteMany();
+    await prisma.user.deleteMany();
 
     // === USERS ===
     const user1 = await prisma.user.create({
@@ -27,7 +27,7 @@ export async function POST() {
         password: await hashPassword("Jan Kowalski"),
         createdAt: new Date("2025-01-15T10:00:00Z"),
       } as any,
-    })
+    });
     const user2 = await prisma.user.create({
       data: {
         name: "Anna Nowak",
@@ -37,7 +37,7 @@ export async function POST() {
         password: await hashPassword("Anna Nowak"),
         createdAt: new Date("2025-01-10T08:00:00Z"),
       } as any,
-    })
+    });
     const user3 = await prisma.user.create({
       data: {
         name: "Piotr Wisniewski",
@@ -47,7 +47,7 @@ export async function POST() {
         password: await hashPassword("Piotr Wisniewski"),
         createdAt: new Date("2025-02-01T09:00:00Z"),
       } as any,
-    })
+    });
     const user4 = await prisma.user.create({
       data: {
         name: "Maria Zielinska",
@@ -57,7 +57,7 @@ export async function POST() {
         password: await hashPassword("Maria Zielinska"),
         createdAt: new Date("2025-03-05T11:00:00Z"),
       } as any,
-    })
+    });
 
     // === ROOMS ===
     const room1 = await prisma.room.create({
@@ -73,7 +73,7 @@ export async function POST() {
         amenities: ["Wi-Fi", "TV", "Air Conditioning", "Mini Bar", "Safe"],
         available: true,
       },
-    })
+    });
     const room2 = await prisma.room.create({
       data: {
         number: "205",
@@ -95,7 +95,7 @@ export async function POST() {
         ],
         available: true,
       },
-    })
+    });
     const room3 = await prisma.room.create({
       data: {
         number: "310",
@@ -119,7 +119,7 @@ export async function POST() {
         ],
         available: true,
       },
-    })
+    });
     await prisma.room.create({
       data: {
         number: "401",
@@ -145,7 +145,7 @@ export async function POST() {
         ],
         available: true,
       },
-    })
+    });
     await prisma.room.create({
       data: {
         number: "102",
@@ -159,7 +159,7 @@ export async function POST() {
         amenities: ["Wi-Fi", "TV", "Air Conditioning", "Safe"],
         available: true,
       },
-    })
+    });
     await prisma.room.create({
       data: {
         number: "208",
@@ -180,7 +180,7 @@ export async function POST() {
         ],
         available: false,
       },
-    })
+    });
 
     // === RESERVATIONS ===
     await prisma.reservation.create({
@@ -197,7 +197,7 @@ export async function POST() {
         totalPrice: 1680,
         createdAt: new Date("2026-02-01T14:30:00Z"),
       },
-    })
+    });
     await prisma.reservation.create({
       data: {
         userId: user4.id,
@@ -212,7 +212,7 @@ export async function POST() {
         totalPrice: 3120,
         createdAt: new Date("2026-02-05T10:00:00Z"),
       },
-    })
+    });
     await prisma.reservation.create({
       data: {
         userId: user1.id,
@@ -227,7 +227,7 @@ export async function POST() {
         totalPrice: 750,
         createdAt: new Date("2026-01-20T09:00:00Z"),
       },
-    })
+    });
 
     // === STAFF ===
     await prisma.staff.create({
@@ -241,7 +241,7 @@ export async function POST() {
         hireDate: new Date("2024-06-15"),
         active: true,
       },
-    })
+    });
     await prisma.staff.create({
       data: {
         userId: user2.id,
@@ -253,7 +253,7 @@ export async function POST() {
         hireDate: new Date("2023-01-10"),
         active: true,
       },
-    })
+    });
     await prisma.staff.create({
       data: {
         name: "Katarzyna Dabrowska",
@@ -264,7 +264,7 @@ export async function POST() {
         hireDate: new Date("2024-09-01"),
         active: true,
       },
-    })
+    });
     await prisma.staff.create({
       data: {
         name: "Tomasz Lewandowski",
@@ -275,7 +275,7 @@ export async function POST() {
         hireDate: new Date("2025-02-20"),
         active: false,
       },
-    })
+    });
 
     return NextResponse.json({
       success: true,
@@ -286,12 +286,12 @@ export async function POST() {
         reservations: 3,
         staff: 4,
       },
-    })
+    });
   } catch (error) {
-    console.error("Seed error:", error)
+    console.error("Seed error:", error);
     return NextResponse.json(
       { success: false, error: String(error) },
-      { status: 500 }
-    )
+      { status: 500 },
+    );
   }
 }

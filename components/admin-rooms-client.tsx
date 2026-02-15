@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import React from "react"
+import React from "react";
 
-import { useState } from "react"
+import { useState } from "react";
 import {
   Table,
   TableBody,
@@ -10,35 +10,35 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
+} from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Textarea } from "@/components/ui/textarea"
-import { Switch } from "@/components/ui/switch"
-import type { Room, RoomType } from "@/lib/types"
-import { toast } from "sonner"
-import { Plus, Pencil, Trash2 } from "lucide-react"
+} from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import type { Room, RoomType } from "@/lib/types";
+import { toast } from "sonner";
+import { Plus, Pencil, Trash2 } from "lucide-react";
 
 export function AdminRoomsClient({ initialRooms }: { initialRooms: Room[] }) {
-  const [rooms, setRooms] = useState(initialRooms)
-  const [dialogOpen, setDialogOpen] = useState(false)
-  const [editing, setEditing] = useState<Room | null>(null)
+  const [rooms, setRooms] = useState(initialRooms);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editing, setEditing] = useState<Room | null>(null);
   const [form, setForm] = useState({
     number: "",
     name: "",
@@ -48,7 +48,7 @@ export function AdminRoomsClient({ initialRooms }: { initialRooms: Room[] }) {
     pricePerNight: "",
     amenities: "",
     available: true,
-  })
+  });
 
   function resetForm() {
     setForm({
@@ -60,17 +60,17 @@ export function AdminRoomsClient({ initialRooms }: { initialRooms: Room[] }) {
       pricePerNight: "",
       amenities: "",
       available: true,
-    })
-    setEditing(null)
+    });
+    setEditing(null);
   }
 
   function openCreate() {
-    resetForm()
-    setDialogOpen(true)
+    resetForm();
+    setDialogOpen(true);
   }
 
   function openEdit(room: Room) {
-    setEditing(room)
+    setEditing(room);
     setForm({
       number: room.number,
       name: room.name,
@@ -80,12 +80,15 @@ export function AdminRoomsClient({ initialRooms }: { initialRooms: Room[] }) {
       pricePerNight: String(room.pricePerNight),
       amenities: room.amenities.join(", "),
       available: room.available,
-    })
-    setDialogOpen(true)
+    });
+    setDialogOpen(true);
   }
 
+  const isNonEmptyAmenity = (value: string): value is string =>
+    value.trim().length > 0;
+
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
+    e.preventDefault();
 
     const payload = {
       number: form.number,
@@ -97,9 +100,9 @@ export function AdminRoomsClient({ initialRooms }: { initialRooms: Room[] }) {
       amenities: form.amenities
         .split(",")
         .map((a) => a.trim())
-        .filter(Boolean),
+        .filter(isNonEmptyAmenity),
       available: form.available,
-    }
+    };
 
     try {
       if (editing) {
@@ -107,39 +110,39 @@ export function AdminRoomsClient({ initialRooms }: { initialRooms: Room[] }) {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
-        })
-        if (!res.ok) throw new Error("Failed to update room")
-        const updated = await res.json()
+        });
+        if (!res.ok) throw new Error("Failed to update room");
+        const updated = await res.json();
         setRooms((prev) =>
-          prev.map((r) => (r.id === updated.id ? updated : r))
-        )
-        toast.success("Room updated successfully")
+          prev.map((r) => (r.id === updated.id ? updated : r)),
+        );
+        toast.success("Room updated successfully");
       } else {
         const res = await fetch("/api/rooms", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload),
-        })
-        if (!res.ok) throw new Error("Failed to create room")
-        const created = await res.json()
-        setRooms((prev) => [...prev, created])
-        toast.success("Room created successfully")
+        });
+        if (!res.ok) throw new Error("Failed to create room");
+        const created = await res.json();
+        setRooms((prev) => [...prev, created]);
+        toast.success("Room created successfully");
       }
-      setDialogOpen(false)
-      resetForm()
+      setDialogOpen(false);
+      resetForm();
     } catch {
-      toast.error("Something went wrong")
+      toast.error("Something went wrong");
     }
   }
 
   async function handleDelete(id: string) {
     try {
-      const res = await fetch(`/api/rooms/${id}`, { method: "DELETE" })
-      if (!res.ok) throw new Error("Failed to delete room")
-      setRooms((prev) => prev.filter((r) => r.id !== id))
-      toast.success("Room deleted")
+      const res = await fetch(`/api/rooms/${id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete room");
+      setRooms((prev) => prev.filter((r) => r.id !== id));
+      toast.success("Room deleted");
     } catch {
-      toast.error("Failed to delete room")
+      toast.error("Failed to delete room");
     }
   }
 
@@ -291,7 +294,9 @@ export function AdminRoomsClient({ initialRooms }: { initialRooms: Room[] }) {
               <TableHead className="text-muted-foreground">Capacity</TableHead>
               <TableHead className="text-muted-foreground">Price</TableHead>
               <TableHead className="text-muted-foreground">Status</TableHead>
-              <TableHead className="text-right text-muted-foreground">Actions</TableHead>
+              <TableHead className="text-right text-muted-foreground">
+                Actions
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -299,7 +304,9 @@ export function AdminRoomsClient({ initialRooms }: { initialRooms: Room[] }) {
               <TableRow key={room.id}>
                 <TableCell>
                   <div>
-                    <p className="font-medium text-card-foreground">{room.name}</p>
+                    <p className="font-medium text-card-foreground">
+                      {room.name}
+                    </p>
                     <p className="text-sm text-muted-foreground">
                       #{room.number}
                     </p>
@@ -308,7 +315,9 @@ export function AdminRoomsClient({ initialRooms }: { initialRooms: Room[] }) {
                 <TableCell>
                   <Badge variant="outline">{room.type}</Badge>
                 </TableCell>
-                <TableCell className="text-card-foreground">{room.capacity}</TableCell>
+                <TableCell className="text-card-foreground">
+                  {room.capacity}
+                </TableCell>
                 <TableCell className="font-medium text-card-foreground">
                   ${room.pricePerNight}
                 </TableCell>
@@ -344,5 +353,5 @@ export function AdminRoomsClient({ initialRooms }: { initialRooms: Room[] }) {
         </Table>
       </div>
     </div>
-  )
+  );
 }

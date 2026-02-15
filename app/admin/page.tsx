@@ -1,25 +1,29 @@
-import { getRooms, getReservations, getStaff } from "@/lib/db"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { formatDate } from "@/lib/utils"
-import { BedDouble, CalendarDays, Users, DollarSign } from "lucide-react"
+import { getRooms, getReservations, getStaff } from "@/lib/db";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { formatDate } from "@/lib/utils";
+import type { Reservation } from "@/lib/types";
+import { BedDouble, CalendarDays, Users, DollarSign } from "lucide-react";
 
 export default async function AdminOverview() {
-  const rooms = await getRooms()
-  const reservations = await getReservations()
-  const staff = await getStaff()
+  const rooms = await getRooms();
+  const reservations = await getReservations();
+  const staff = await getStaff();
 
-  const availableRooms = rooms.filter((r) => r.available).length
+  const isRevenueEligible = (r: Reservation): r is Reservation =>
+    r.status !== "CANCELLED";
+
+  const availableRooms = rooms.filter((r) => r.available).length;
   const pendingReservations = reservations.filter(
-    (r) => r.status === "PENDING"
-  ).length
+    (r) => r.status === "PENDING",
+  ).length;
   const confirmedReservations = reservations.filter(
-    (r) => r.status === "CONFIRMED"
-  ).length
+    (r) => r.status === "CONFIRMED",
+  ).length;
   const totalRevenue = reservations
-    .filter((r) => r.status !== "CANCELLED")
-    .reduce((sum, r) => sum + r.totalPrice, 0)
-  const activeStaff = staff.filter((s) => s.active).length
+    .filter(isRevenueEligible)
+    .reduce((sum, r) => sum + r.totalPrice, 0);
+  const activeStaff = staff.filter((s) => s.active).length;
 
   const stats = [
     {
@@ -46,7 +50,7 @@ export default async function AdminOverview() {
       subtitle: `${activeStaff} active`,
       icon: Users,
     },
-  ]
+  ];
 
   return (
     <div>
@@ -73,24 +77,28 @@ export default async function AdminOverview() {
         ))}
       </div>
 
-      {/* Recent reservations */}
       <Card className="mt-8 border-border/60 bg-card">
         <CardHeader>
-          <CardTitle className="text-card-foreground">Recent Reservations</CardTitle>
+          <CardTitle className="text-card-foreground">
+            Recent Reservations
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col gap-3">
             {reservations.slice(0, 5).map((res) => {
-              const room = res.room
+              const room = res.room;
               return (
                 <div
                   key={res.id}
                   className="flex items-center justify-between rounded-lg border border-border/60 p-4"
                 >
                   <div>
-                    <p className="font-medium text-card-foreground">{res.guestName}</p>
+                    <p className="font-medium text-card-foreground">
+                      {res.guestName}
+                    </p>
                     <p className="text-sm text-muted-foreground">
-                      {room?.name} &middot; {formatDate(new Date(res.checkIn))} to {formatDate(new Date(res.checkOut))}
+                      {room?.name} &middot; {formatDate(new Date(res.checkIn))}{" "}
+                      to {formatDate(new Date(res.checkOut))}
                     </p>
                   </div>
                   <div className="flex items-center gap-3">
@@ -110,11 +118,11 @@ export default async function AdminOverview() {
                     </Badge>
                   </div>
                 </div>
-              )
+              );
             })}
           </div>
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
