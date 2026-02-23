@@ -1,3 +1,5 @@
+https://v0.app/chat/hotel-management-system-pyPe6hJQFau?ref=DJ8DTE
+
 chat gpt:
 
 Napisz prompt do llm-a v0 ktory stworzy mi aplikacje internetowa w next.js w oparciu o typescript, ktorej budowa bedzie opierac sie na komponentach z shadcn, zaimplementuj takze baze danych na module prisma. 
